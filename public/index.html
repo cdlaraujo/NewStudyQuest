@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduQuest</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">⚔️ EduQuest</div>
+      <div id="hud" class="hud" hidden>
+        <span class="hud-item" title="Level">🏅 Lv <strong id="hud-level">1</strong></span>
+        <span class="hud-item" title="Experience">
+          ✨ XP <strong id="hud-xp">0</strong>
+          <span class="xpbar"><span id="hud-xpbar" class="xpbar-fill"></span></span>
+        </span>
+        <span class="hud-item" title="Streak">🔥 <strong id="hud-streak">0</strong></span>
+        <span id="hud-bonus" class="badge" hidden>2× bonus active</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Create a campaign -->
+      <section id="create-panel" class="panel">
+        <h1>Turn your notes into a quest</h1>
+        <p class="muted">
+          Paste chatbot-formatted study material below (see
+          <code>PROMPT.md</code>), or load the sample, then generate your campaign.
+        </p>
+        <textarea id="source" spellcheck="false" rows="14"></textarea>
+        <div class="row">
+          <button id="load-sample" class="btn ghost">Load sample</button>
+          <button id="generate-btn" class="btn primary">Generate campaign →</button>
+        </div>
+        <p id="create-error" class="error" hidden></p>
+      </section>
+
+      <!-- Play -->
+      <section id="play-panel" class="panel" hidden>
+        <div class="play-head">
+          <div>
+            <h1 id="campaign-name">Campaign</h1>
+            <nav id="trails-nav" class="trails-nav"></nav>
+          </div>
+          <div class="play-actions">
+            <button id="review-btn" class="btn ghost">📚 Review</button>
+            <button id="restart-btn" class="btn ghost">＋ New campaign</button>
+          </div>
+        </div>
+
+        <div id="review-panel" class="review-panel" hidden></div>
+
+        <h2 id="trail-title" class="trail-title"></h2>
+        <div id="quests" class="quests"></div>
+        <div id="boss" class="boss" hidden></div>
+        <div id="trail-done" class="trail-done" hidden></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
