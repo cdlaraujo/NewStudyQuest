@@ -44,7 +44,7 @@ export class FillInTheBlankQuest extends Quest {
     return {
       id: this.id,
       type: 'fill-in-the-blank',
-      prompt: this.question,
+      prompt: this.question.replace(GAP_PATTERN, '_____'),
       gaps: this.gapCount,
     };
   }

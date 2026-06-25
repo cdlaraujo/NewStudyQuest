@@ -74,9 +74,12 @@ export class AnswerQuest {
       leveledUp = levelResult.didLevelUp;
       player.incrementStreak();
       campaign.completeCurrentTrail(); // unlocks the next trail if this finished one
-    } else if (regularQuest) {
-      // Only non-boss failures are queued for review.
-      this.reviewQueue.enqueue(regularQuest, REVIEW_ERROR_WEIGHT);
+    } else {
+      player.resetStreak();
+      if (regularQuest) {
+        // Only non-boss failures are queued for review.
+        this.reviewQueue.enqueue(regularQuest, REVIEW_ERROR_WEIGHT);
+      }
     }
 
     this.players.save(player);

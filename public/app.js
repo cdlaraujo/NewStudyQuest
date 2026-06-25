@@ -29,6 +29,7 @@ const state = {
   campaignId: null,
   campaign: null,
   currentTrailOrder: null,
+  currentQuestIndex: 0,
   bossIndex: 0,
   completed: new Set(), // quest ids answered correctly this session
 };
@@ -134,14 +135,12 @@ function render() {
   }
 
   state.currentTrailOrder = trail.order;
+  state.currentQuestIndex = 0;
   state.bossIndex = 0;
   $('trail-done').hidden = true;
   $('trail-title').textContent = `Trail ${trail.order}: ${trail.name}`;
 
-  $('quests').innerHTML = '';
-  trail.quests.forEach((q) => $('quests').appendChild(questCard(q, trail)));
-
-  renderBoss(trail);
+  renderCurrentQuest(trail);
 }
 
 function renderTrailsNav() {
@@ -190,6 +189,24 @@ function questCard(q, trail, opts = {}) {
     }),
   );
   return card;
+}
+
+function renderCurrentQuest(trail) {
+  const questsEl = $('quests');
+  questsEl.innerHTML = '';
+  $('boss').hidden = true;
+
+  const idx = state.currentQuestIndex;
+  if (idx >= trail.quests.length) {
+    renderBoss(trail);
+    return;
+  }
+
+  const progress = document.createElement('p');
+  progress.className = 'quest-progress muted';
+  progress.textContent = `Question ${idx + 1} of ${trail.quests.length}`;
+  questsEl.appendChild(progress);
+  questsEl.appendChild(questCard(trail.quests[idx], trail));
 }
 
 function renderBoss(trail) {
@@ -241,11 +258,19 @@ async function handleAnswer({ q, isFill, fields, card, button, trail, boss }) {
     feedback.textContent = `✓ Correct!  +${data.xpGained} XP`;
     if (data.leveledUp) toast(`⬆️ Level up! You are now level ${data.newLevel}`, true);
     else toast(`✓ +${data.xpGained} XP`);
-    await maybeAdvanceTrail();
+    setTimeout(() => {
+      state.currentQuestIndex += 1;
+      const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
+      renderCurrentQuest(trail);
+    }, 800);
   } else {
     feedback.className = 'feedback bad';
     feedback.textContent = '✗ Not quite — added to your review queue.';
-    button.disabled = false;
+    setTimeout(() => {
+      state.currentQuestIndex += 1;
+      const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
+      renderCurrentQuest(trail);
+    }, 1200);
   }
 }
 
@@ -262,14 +287,12 @@ async function handleBossResult(data, trail, feedback) {
       renderBoss(trail);
     }
   } else {
-    state.bossIndex = 0;
-    renderBoss(trail);
-    const bossEl = $('boss');
-    const fb = bossEl.querySelector('.feedback');
-    if (fb) {
-      fb.className = 'feedback bad';
-      fb.textContent = '✗ Wrong — the boss resets! Start from question 1.';
-    }
+    feedback.className = 'feedback bad';
+    feedback.textContent = '✗ Wrong — the boss resets! Start from question 1.';
+    setTimeout(() => {
+      state.bossIndex = 0;
+      renderBoss(trail);
+    }, 1200);
   }
 }
 
