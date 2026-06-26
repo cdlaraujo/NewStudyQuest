@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,36 +18,36 @@
           <span class="xpbar"><span id="hud-xpbar" class="xpbar-fill"></span></span>
         </span>
         <span class="hud-item" title="Streak">🔥 <strong id="hud-streak">0</strong></span>
-        <span id="hud-bonus" class="badge" hidden>2× bonus active</span>
+        <span id="hud-bonus" class="badge" hidden>2× bônus ativo</span>
       </div>
     </header>
 
     <main>
-      <!-- Create a campaign -->
+      <!-- Criar campanha -->
       <section id="create-panel" class="panel">
-        <h1>Turn your notes into a quest</h1>
+        <h1>Transforme suas anotações em uma quest</h1>
         <p class="muted">
-          Paste chatbot-formatted study material below (see
-          <code>PROMPT.md</code>), or load the sample, then generate your campaign.
+          Cole o material de estudo formatado pelo chatbot abaixo (veja
+          <code>PROMPT.md</code>), ou carregue o exemplo, e gere sua campanha.
         </p>
         <textarea id="source" spellcheck="false" rows="14"></textarea>
         <div class="row">
-          <button id="load-sample" class="btn ghost">Load sample</button>
-          <button id="generate-btn" class="btn primary">Generate campaign →</button>
+          <button id="load-sample" class="btn ghost">Carregar exemplo</button>
+          <button id="generate-btn" class="btn primary">Gerar campanha →</button>
         </div>
         <p id="create-error" class="error" hidden></p>
       </section>
 
-      <!-- Play -->
+      <!-- Jogar -->
       <section id="play-panel" class="panel" hidden>
         <div class="play-head">
           <div>
-            <h1 id="campaign-name">Campaign</h1>
+            <h1 id="campaign-name">Campanha</h1>
             <nav id="trails-nav" class="trails-nav"></nav>
           </div>
           <div class="play-actions">
-            <button id="review-btn" class="btn ghost">📚 Review</button>
-            <button id="restart-btn" class="btn ghost">＋ New campaign</button>
+            <button id="review-btn" class="btn ghost">📚 Revisão</button>
+            <button id="restart-btn" class="btn ghost">＋ Nova campanha</button>
           </div>
         </div>
 

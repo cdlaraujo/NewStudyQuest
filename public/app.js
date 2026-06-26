@@ -1,31 +1,30 @@
 'use strict';
 
 // ---- Campanha de exemplo (corresponde a examples/sample-campaign.txt) ----
-const SAMPLE = `CAMPANHA: Cell Biology Basics
+const SAMPLE = `CAMPANHA: Noções Básicas de Biologia Celular
 
-TRILHA: The Cell
+TRILHA: A Célula
 ORDEM: 1
-Q: Which organelle stores the cell's genetic material?
-R: Nucleus
-Q: Which organelle is the powerhouse of the cell?
-A: {Cell wall, *Mitochondria, Ribosome, Nucleus}
-L: The {nucleus} stores DNA while ribosomes build {proteins}.
+Q: Qual organela armazena o material genético da célula?
+R: Núcleo
+Q: Qual organela é a central de energia da célula?
+A: {Parede celular, *Mitocôndria, Ribossomo, Núcleo}
+L: O {núcleo} armazena o DNA, enquanto os ribossomos produzem {proteínas}.
 BOSS
-Q: What surrounds and protects the whole cell?
-R: Cell membrane
-L: Plant cells additionally have a rigid {cell wall}.
+Q: O que envolve e protege toda a célula?
+R: Membrana celular
+L: As células vegetais possuem, adicionalmente, uma {parede celular} rígida.
 
-TRILHA: DNA and Genetics
+TRILHA: DNA e Genética
 ORDEM: 2
-Q: How many strands does a DNA double helix have?
+Q: Quantas fitas possui a dupla hélice de DNA?
 R: 2
-Q: Which molecule carries genetic information from DNA to ribosomes?
-A: {tRNA, rRNA, *mRNA, snRNA}
-L: DNA is made of repeating units called {nucleotides}.
+Q: Qual molécula transporta a informação genética do DNA para os ribossomos?
+R: {tRNA, rRNA, *mRNA, snRNA}
+L: O DNA é composto por unidades repetitivas chamadas {nucleotídeos}.
 BOSS
-Q: Which base pairs with adenine in DNA?
-A: {Guanine, Cytosine, *Thymine, Uracil}
-L: The double helix was discovered by Watson and {Crick}.`;
+Q: Qual base se pareia com a adenina no DNA?
+R: {Guanina, Citosina, *Timina, Uracila}`;
 
 // ---- Estado da aplicação ----
 const state = {
@@ -95,13 +94,13 @@ async function onGenerate() {
   const errEl = $('create-error');
   errEl.hidden = true;
   if (!text) {
-    errEl.textContent = 'Paste some campaign text first (or load the sample).';
+    errEl.textContent = 'Cole o texto da campanha primeiro (ou carregue o exemplo).';
     errEl.hidden = false;
     return;
   }
   const { status, data } = await generateCampaign(text);
   if (status !== 201 || !data) {
-    errEl.textContent = (data && data.error) || 'Could not generate the campaign.';
+    errEl.textContent = (data && data.error) || 'Não foi possível gerar a campanha.';
     errEl.hidden = false;
     return;
   }
@@ -150,8 +149,8 @@ function render() {
     $('quests').innerHTML = '';
     $('boss').hidden = true;
     $('trail-done').hidden = false;
-    $('trail-done').innerHTML = `<h2>🎉 Campaign complete!</h2>
-      <p class="muted">Every trail cleared. Use <strong>Review</strong> to revisit tricky questions, or start a new campaign.</p>`;
+    $('trail-done').innerHTML = `<h2>🎉 Campanha concluída!</h2>
+      <p class="muted">Todas as trilhas concluídas. Use <strong>Revisão</strong> para rever questões difíceis, ou inicie uma nova campanha.</p>`;
     return;
   }
 
@@ -159,7 +158,7 @@ function render() {
   state.currentQuestIndex = 0;
   state.bossIndex = 0;
   $('trail-done').hidden = true;
-  $('trail-title').textContent = `Trail ${trail.order}: ${trail.name}`;
+  $('trail-title').textContent = `Trilha ${trail.order}: ${trail.name}`;
 
   renderCurrentQuest(trail);
 }
@@ -186,30 +185,30 @@ function questCard(q, trail, opts = {}) {
 
   if (isMC) {
     card.innerHTML = `
-      <div class="qtype">Multiple choice</div>
+      <div class="qtype">Múltipla escolha</div>
       <div class="prompt">${esc(q.prompt)}</div>
       <div class="mc-options">
         ${(q.options ?? []).map((opt, i) =>
-          `<label class="mc-label"><input type="radio" name="mc-${q.id}" value="${i}" ${done ? 'disabled' : ''} />${esc(opt)}</label>`
+          `<label class="mc-label"><input type="radio" name="mc-${q.id}" value="${i}" ${done ? 'disabled' : ''}/>${esc(opt)}</label>`
         ).join('')}
       </div>
       <div class="answer-row" style="margin-top:10px">
-        <button class="btn primary">${done ? 'Answered ✓' : 'Submit'}</button>
+        <button class="btn primary">${done ? 'Respondida ✓' : 'Enviar'}</button>
       </div>
-      <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Solved' : ''}</div>`;
+      <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Resolvida' : ''}</div>`;
   } else {
     const isFillInputs = isFill
-      ? Array.from({ length: q.gaps || 1 }, (_, i) => `<input data-gap="${i}" placeholder="Gap ${i + 1}" />`).join('')
-      : `<input placeholder="Your answer" />`;
-    const qtypeLabel = isFill ? 'Fill in the blank' : 'Quiz';
+      ? Array.from({ length: q.gaps || 1 }, (_, i) => `<input data-gap="${i}" placeholder="Lacuna ${i + 1}" />`).join('')
+      : `<input placeholder="Sua resposta" />`;
+    const qtypeLabel = isFill ? 'Preencher lacunas' : 'Quiz';
     card.innerHTML = `
       <div class="qtype">${qtypeLabel}</div>
       <div class="prompt">${esc(q.prompt)}</div>
       <div class="answer-row">
         ${isFillInputs}
-        <button class="btn primary">${done ? 'Answered ✓' : 'Submit'}</button>
+        <button class="btn primary">${done ? 'Respondida ✓' : 'Enviar'}</button>
       </div>
-      <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Solved' : ''}</div>`;
+      <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Resolvida' : ''}</div>`;
   }
 
   const button = card.querySelector('button');
@@ -245,7 +244,7 @@ function renderCurrentQuest(trail) {
 
   const progress = document.createElement('p');
   progress.className = 'quest-progress muted';
-  progress.textContent = `Question ${nextIdx + 1} of ${trail.quests.length}`;
+  progress.textContent = `Questão ${nextIdx + 1} de ${trail.quests.length}`;
   questsEl.appendChild(progress);
   questsEl.appendChild(questCard(trail.quests[nextIdx], trail));
   renderMath(questsEl);
@@ -262,8 +261,8 @@ function renderBoss(trail) {
   const idx = state.bossIndex;
   const q = trail.boss[idx];
   bossEl.innerHTML = `
-    <h3>🐉 Boss Challenge</h3>
-    <div class="boss-progress">Question ${idx + 1} of ${trail.boss.length} — one mistake restarts the boss!</div>
+    <h3>🐉 Desafio Boss</h3>
+    <div class="boss-progress">Questão ${idx + 1} de ${trail.boss.length} — um erro reinicia o boss!</div>
     <div id="boss-card"></div>`;
   const card = questCard(q, trail, { boss: true });
   bossEl.querySelector('#boss-card').appendChild(card);
@@ -285,7 +284,7 @@ async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss
       : answer.trim() === '';
   if (isEmpty) {
     feedback.className = 'feedback bad';
-    feedback.textContent = isMC ? 'Pick an option first.' : 'Fill in every box first.';
+    feedback.textContent = isMC ? 'Selecione uma opção primeiro.' : 'Preencha todos os campos primeiro.';
     return;
   }
 
@@ -295,7 +294,7 @@ async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss
 
   if (!data) {
     feedback.className = 'feedback bad';
-    feedback.textContent = 'Something went wrong.';
+    feedback.textContent = 'Algo deu errado.';
     button.disabled = false;
     return;
   }
@@ -306,10 +305,10 @@ async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss
     state.completed.add(q.id);
     card.classList.add('done');
     fields.forEach((f) => (f.disabled = true));
-    button.textContent = 'Answered ✓';
+    button.textContent = 'Respondida ✓';
     feedback.className = 'feedback ok';
-    feedback.textContent = `✓ Correct!  +${data.xpGained} XP`;
-    if (data.leveledUp) toast(`⬆️ Level up! You are now level ${data.newLevel}`, true);
+    feedback.textContent = `✓ Correto!  +${data.xpGained} XP`;
+    if (data.leveledUp) toast(`⬆️ Subiu de nível! Você agora é nível ${data.newLevel}`, true);
     else toast(`✓ +${data.xpGained} XP`);
     setTimeout(() => {
       const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
@@ -317,7 +316,7 @@ async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss
     }, 800);
   } else {
     feedback.className = 'feedback bad';
-    feedback.textContent = `✗ Not quite — answer: ${formatAnswer(data.correctAnswer)}. Added to review.`;
+    feedback.textContent = `✗ Não foi — resposta: ${formatAnswer(data.correctAnswer)}. Adicionada à revisão.`;
     setTimeout(() => {
       const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
       renderCurrentQuest(trail);
@@ -333,17 +332,17 @@ async function handleBossResult(data, trail, feedback) {
     const bossLength = activTrail().boss?.length ?? 0;
     const last = state.bossIndex >= bossLength - 1;
     if (last) {
-      toast('🐉 Boss defeated!  +50 XP', true);
+      toast('🐉 Boss derrotado!  +50 XP', true);
       state.bossIndex = 0;
       await maybeAdvanceTrail();
     } else {
       state.bossIndex += 1;
-      toast('✓ Boss question cleared!');
+      toast('✓ Questão do boss respondida!');
       renderBoss(activTrail());
     }
   } else {
     feedback.className = 'feedback bad';
-    feedback.textContent = `✗ Wrong — answer: ${formatAnswer(data.correctAnswer)}. Trail resets!`;
+    feedback.textContent = `✗ Errado — resposta: ${formatAnswer(data.correctAnswer)}. A trilha reinicia!`;
     setTimeout(() => {
       const t = activTrail();
       (t.quests ?? []).forEach((q) => state.completed.delete(q.id));
@@ -362,7 +361,7 @@ async function maybeAdvanceTrail() {
   const trail = currentTrail();
   const newOrder = trail ? trail.order : null;
   if (newOrder !== state.currentTrailOrder) {
-    if (trail) toast(`🗺️ Trail ${trail.order} unlocked: ${trail.name}`);
+    if (trail) toast(`🗺️ Trilha ${trail.order} desbloqueada: ${trail.name}`);
     render();
   } else {
     renderTrailsNav();
@@ -375,10 +374,10 @@ async function onReview() {
   const { status, data } = await fetchReview();
   panel.hidden = false;
   if (status === 204 || !data) {
-    panel.innerHTML = `<h3>📚 Review</h3><p class="muted">Nothing to review yet — miss a question and it shows up here.</p>`;
+    panel.innerHTML = `<h3>📚 Revisão</h3><p class="muted">Nada para revisar ainda — erre uma questão e ela aparece aqui.</p>`;
     return;
   }
-  panel.innerHTML = `<h3>📚 Review this one</h3><div id="review-card"></div>`;
+  panel.innerHTML = `<h3>📚 Revise esta</h3><div id="review-card"></div>`;
   const trail = currentTrail();
   const card = questCard(data, trail);
   panel.querySelector('#review-card').appendChild(card);
