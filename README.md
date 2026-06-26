@@ -11,7 +11,7 @@ Arquitetura limpa / hexagonal — as dependências apontam para dentro; o domín
 ```
 src/
 ├── domain/                     # regras de negócio puras, sem imports de framework
-│   ├── quest/                  # Quest (abstrato) + QuizQuest, FillInTheBlankQuest, QuestResult
+│   ├── quest/                  # Quest (abstrato) + QuizQuest, FillInTheBlankQuest, MultipleChoiceQuest, QuestResult
 │   ├── boss/                   # BossContainer (composição, não é uma Quest)
 │   ├── trail/                  # Trilha + máquina de estados TrailState
 │   ├── campaign/               # Campanha (desbloqueio sequencial)
@@ -106,6 +106,7 @@ Retorna a estrutura atual de uma campanha (incluindo os estados das trilhas em t
 
 - **QuizQuest** — resposta de string única, insensível a maiúsculas/minúsculas e espaços, 10 XP.
 - **FillInTheBlankQuest** — `{lacunas}` respondidas com um array de strings, 15 XP.
+- **MultipleChoiceQuest** — o jogador responde com o índice (string) da opção correta; 10 XP.
 - **Boss** — responda todas as perguntas em ordem; um erro reinicia o boss inteiro; ao concluí-lo ganha 50 XP. Erros no boss nunca vão para a fila de revisão.
 - **Níveis** — o XP necessário para sair do nível `L` é `L * 100`; saltos de múltiplos níveis são tratados em uma única concessão.
 - **Sequência (Streak)** — se estende com atividade no mesmo dia ou no dia seguinte, reseta após um dia perdido; ao atingir 7 ativa uma janela bônus de 24 horas que dobra o XP (via modificador `StreakBonus` — o `Player` não contém lógica de bônus).
