@@ -1,8 +1,8 @@
 import { Player } from '../../domain/player/Player';
 
 /**
- * Port for player persistence. Use cases depend only on this interface, never
- * on a concrete store.
+ * Port para persistência do jogador. Os casos de uso dependem apenas desta
+ * interface, nunca de um armazenamento concreto.
  */
 export interface PlayerRepository {
   save(player: Player): void;

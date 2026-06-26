@@ -1,7 +1,7 @@
 import { Campanha } from '../../domain/campaign/Campanha';
 import { CampaignRepository } from '../ports/CampaignRepository';
 
-/** Loads a campaign by id so the UI can refresh trail states after answers. */
+/** Carrega uma campanha por id para que a UI possa atualizar os estados das trilhas após respostas. */
 export class GetCampaign {
   constructor(private readonly campaigns: CampaignRepository) {}
 

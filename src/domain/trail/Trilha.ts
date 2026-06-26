@@ -8,9 +8,9 @@ export enum TrailState {
 }
 
 /**
- * A trail (Trilha) groups a set of regular quests plus exactly one boss, and
- * owns a small three-state machine. It knows nothing about the campaign it
- * belongs to — it only exposes its own state, quests and boss.
+ * Uma trilha (Trilha) agrupa um conjunto de quests normais mais exatamente um boss,
+ * e possui uma pequena máquina de três estados. Ela não sabe nada sobre a campanha
+ * à qual pertence — apenas expõe seu próprio estado, quests e boss.
  */
 export class Trilha {
   #state: TrailState = TrailState.LOCKED;
@@ -43,7 +43,7 @@ export class Trilha {
     return this.#quests.find((quest) => quest.id === questId);
   }
 
-  /** LOCKED → UNLOCKED. Unlocking from any other state is a programming error. */
+  /** LOCKED → UNLOCKED. Desbloquear a partir de qualquer outro estado é um erro de programação. */
   unlock(): void {
     if (this.#state !== TrailState.LOCKED) {
       throw new Error(
@@ -54,9 +54,9 @@ export class Trilha {
   }
 
   /**
-   * True when every regular quest is completed and the boss is cleared. The
-   * first time this holds the trail transitions to COMPLETED. A LOCKED trail
-   * can never be complete.
+   * True quando todas as quests normais estão concluídas e o boss foi derrotado.
+   * Na primeira vez que isso ocorre, a trilha transiciona para COMPLETED. Uma
+   * trilha LOCKED nunca pode estar completa.
    */
   isCompleted(): boolean {
     if (this.#state === TrailState.COMPLETED) {

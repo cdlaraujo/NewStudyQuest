@@ -1,13 +1,13 @@
 import { Trilha, TrailState } from '../trail/Trilha';
 
 /**
- * A campaign owns its trails (sorted by order) and the sequential-unlocking
- * rule. On construction the first trail (ORDEM: 1) is unlocked automatically;
- * finishing the current trail unlocks the next one. That progression logic
- * lives here and nowhere else.
+ * A campanha possui suas trilhas (ordenadas por ordem) e a regra de desbloqueio
+ * sequencial. Na construção, a primeira trilha (ORDEM: 1) é desbloqueada
+ * automaticamente; concluir a trilha atual desbloqueia a próxima. Essa lógica
+ * de progressão vive aqui e em nenhum outro lugar.
  */
 export class Campanha {
-  /** Assigned by the repository when the campaign is first persisted. */
+  /** Atribuído pelo repositório quando a campanha é persistida pela primeira vez. */
   public id?: string;
 
   readonly #trails: Trilha[];
@@ -26,15 +26,15 @@ export class Campanha {
     return this.#trails;
   }
 
-  /** The first trail currently in the UNLOCKED state, if any. */
+  /** A primeira trilha atualmente no estado UNLOCKED, se houver. */
   getCurrentUnlockedTrail(): Trilha | undefined {
     return this.#trails.find((trail) => trail.getState() === TrailState.UNLOCKED);
   }
 
   /**
-   * If the current unlocked trail is complete, unlock the next trail by order
-   * and return it. Returns undefined when the trail is not complete yet or
-   * there is no further trail.
+   * Se a trilha desbloqueada atual estiver concluída, desbloqueia a próxima por
+   * ordem e a retorna. Retorna undefined quando a trilha ainda não está concluída
+   * ou não há uma próxima trilha.
    */
   completeCurrentTrail(): Trilha | undefined {
     const current = this.getCurrentUnlockedTrail();

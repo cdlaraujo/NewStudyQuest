@@ -1,15 +1,15 @@
 import { Answer, Quest } from '../quest/Quest';
 import { QuestResult } from '../quest/QuestResult';
 
-/** Fixed reward granted for clearing an entire boss. */
+/** Recompensa fixa concedida por derrotar um boss inteiro. */
 export const BOSS_XP_REWARD = 50;
 
 /**
- * A boss is composition, not inheritance: it is NOT a Quest, it *contains* an
- * ordered list of quests. A private cursor tracks the next question. Answering
- * correctly advances the cursor; a single wrong answer restarts the whole boss
- * from the beginning. Clearing the final question grants a fixed reward. All of
- * this state is self-managed — no caller knows about the cursor or the restart.
+ * Um boss é composição, não herança: NÃO é uma Quest, ele *contém* uma lista
+ * ordenada de quests. Um cursor privado rastreia a próxima pergunta. Responder
+ * corretamente avança o cursor; uma única resposta errada reinicia o boss do
+ * início. Concluir a última pergunta concede uma recompensa fixa. Todo esse
+ * estado é autogerenciado — nenhum chamador sabe sobre o cursor ou o reinício.
  */
 export class BossContainer {
   #current = 0;
@@ -28,7 +28,7 @@ export class BossContainer {
     return this.#quests;
   }
 
-  /** The question the player must answer next (null when the boss is empty). */
+  /** A pergunta que o jogador deve responder a seguir (null quando o boss está vazio). */
   getCurrentQuest(): Quest | null {
     return this.#quests[this.#current] ?? null;
   }
@@ -38,10 +38,10 @@ export class BossContainer {
   }
 
   /**
-   * Attempts the current question. Correct → advance (and, if that was the
-   * last one, finish the boss for {@link BOSS_XP_REWARD} XP and reset the
-   * cursor). Wrong → restart the whole boss. Intermediate correct answers
-   * carry no XP; only clearing the boss does.
+   * Tenta responder a pergunta atual. Correto → avança (e, se for a última,
+   * conclui o boss com {@link BOSS_XP_REWARD} XP e reinicia o cursor). Errado →
+   * reinicia o boss inteiro. Respostas corretas intermediárias não concedem XP;
+   * apenas derrotar o boss concede.
    */
   answerNext(answer: Answer): QuestResult {
     if (this.#quests.length === 0) {
@@ -50,20 +50,20 @@ export class BossContainer {
 
     const result = this.#quests[this.#current].complete(answer);
     if (!result.success) {
-      this.#current = 0; // any mistake sends the player back to the start
+      this.#current = 0; // qualquer erro manda o jogador de volta ao início
       return QuestResult.wrong(result.correctAnswer);
     }
 
     this.#current += 1;
     if (this.#current === this.#quests.length) {
       this.#completed = true;
-      this.#current = 0; // ready for a replay if ever needed
+      this.#current = 0; // pronto para replay, se necessário
       return QuestResult.correct(BOSS_XP_REWARD);
     }
-    return QuestResult.correct(0); // progressed, but the boss is not cleared yet
+    return QuestResult.correct(0); // avançou, mas o boss ainda não foi derrotado
   }
 
-  /** True once the boss has been cleared (empty bosses are trivially complete). */
+  /** True após o boss ser derrotado (bosses vazios são trivialmente completos). */
   isComplete(): boolean {
     return this.#quests.length === 0 || this.#completed;
   }

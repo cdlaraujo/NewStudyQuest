@@ -15,7 +15,7 @@ import { GetNextReview } from './application/usecases/GetNextReview';
 import { GetPlayer } from './application/usecases/GetPlayer';
 import { GetCampaign } from './application/usecases/GetCampaign';
 
-// ---- Composition root: build every dependency and wire them together ----
+// ---- Composition root: constrói todas as dependências e as conecta ----
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
@@ -26,7 +26,7 @@ const playerRepo = new InMemoryPlayerRepository(player);
 const reviewQueue = new ReviewQueue(new WeightedRandomStrategy());
 const parser = new CampaignParser();
 
-// The streak bonus is composed into XP awards (same idea as PricingService(fees)).
+// O bônus de streak é composto nas concessões de XP (mesma ideia de PricingService(taxas)).
 const xpModifiers = [new StreakBonus(player)];
 
 const useCases = {

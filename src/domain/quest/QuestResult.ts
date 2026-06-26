@@ -1,6 +1,6 @@
 /**
- * Tiny immutable value object returned whenever a quest is attempted.
- * It only carries whether the attempt succeeded and how much XP it is worth.
+ * Pequeno value object imutável retornado sempre que uma quest é tentada.
+ * Carrega apenas se a tentativa foi bem-sucedida e quanto XP ela vale.
  */
 export class QuestResult {
   constructor(

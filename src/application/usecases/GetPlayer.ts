@@ -1,7 +1,7 @@
 import { Player } from '../../domain/player/Player';
 import { PlayerRepository } from '../ports/PlayerRepository';
 
-/** Returns the current player so the UI can show a live XP/level/streak HUD. */
+/** Retorna o jogador atual para que a UI possa exibir o HUD de XP/nível/streak em tempo real. */
 export class GetPlayer {
   constructor(
     private readonly players: PlayerRepository,

@@ -5,7 +5,7 @@ import { ReviewEntry, WeightStrategy } from '../src/domain/review/WeightStrategy
 import { QuizQuest } from '../src/domain/quest/QuizQuest';
 
 describe('ReviewQueue', () => {
-  it('enqueues a quest with its initial weight', () => {
+  it('enfileira uma quest com seu peso inicial', () => {
     const queue = new ReviewQueue();
     queue.enqueue(new QuizQuest('q', 'a'), 5);
 
@@ -13,7 +13,7 @@ describe('ReviewQueue', () => {
     expect(queue.getEntries()[0].weight).toBe(5);
   });
 
-  it('stacks weight when the same quest is enqueued again', () => {
+  it('acumula peso quando a mesma quest é enfileirada novamente', () => {
     const queue = new ReviewQueue();
     const quest = new QuizQuest('q', 'a');
 
@@ -24,7 +24,7 @@ describe('ReviewQueue', () => {
     expect(queue.getEntries()[0].weight).toBe(10);
   });
 
-  it('delegates getNext to the injected strategy', () => {
+  it('delega getNext à strategy injetada', () => {
     const quest = new QuizQuest('q', 'a');
     const strategy: WeightStrategy = { select: jest.fn().mockReturnValue(quest) };
     const queue = new ReviewQueue(strategy);
@@ -36,7 +36,7 @@ describe('ReviewQueue', () => {
 });
 
 describe('WeightedRandomStrategy', () => {
-  it('picks proportionally to weight using the injected RNG', () => {
+  it('escolhe proporcionalmente ao peso usando o RNG injetado', () => {
     const qA = new QuizQuest('a', 'a');
     const qB = new QuizQuest('b', 'b');
     const entries: ReviewEntry[] = [
@@ -44,18 +44,18 @@ describe('WeightedRandomStrategy', () => {
       { quest: qB, weight: 3, lastAttempt: new Date() },
     ];
 
-    // total weight = 4; roll = rng() * 4
-    expect(new WeightedRandomStrategy(() => 0).select(entries)).toBe(qA); // roll 0 -> first
-    expect(new WeightedRandomStrategy(() => 0.5).select(entries)).toBe(qB); // roll 2 -> second
+    // peso total = 4; sorteio = rng() * 4
+    expect(new WeightedRandomStrategy(() => 0).select(entries)).toBe(qA); // sorteio 0 -> primeiro
+    expect(new WeightedRandomStrategy(() => 0.5).select(entries)).toBe(qB); // sorteio 2 -> segundo
   });
 
-  it('returns null for an empty queue', () => {
+  it('retorna null para uma fila vazia', () => {
     expect(new WeightedRandomStrategy().select([])).toBeNull();
   });
 });
 
 describe('TimeDecayWeightStrategy', () => {
-  it('increases each weight in proportion to the days since last attempt', () => {
+  it('aumenta cada peso em proporção aos dias desde a última tentativa', () => {
     const now = new Date('2026-06-15T00:00:00');
     const threeDaysAgo = new Date('2026-06-12T00:00:00');
     const entries: ReviewEntry[] = [
@@ -64,7 +64,7 @@ describe('TimeDecayWeightStrategy', () => {
 
     new TimeDecayWeightStrategy(1, () => now).applyDecay(entries);
 
-    expect(entries[0].weight).toBe(8); // 5 + (3 days * 1)
+    expect(entries[0].weight).toBe(8); // 5 + (3 dias * 1)
     expect(entries[0].lastAttempt).toEqual(now);
   });
 });

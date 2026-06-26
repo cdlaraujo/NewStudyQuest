@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { Campanha } from '../../domain/campaign/Campanha';
 import { CampaignRepository } from '../../application/ports/CampaignRepository';
 
-/** In-memory campaign store. Assigns a UUID the first time a campaign is saved. */
+/** Armazenamento de campanhas em memória. Atribui um UUID na primeira vez que uma campanha é salva. */
 export class InMemoryCampaignRepository implements CampaignRepository {
   private readonly store = new Map<string, Campanha>();
 

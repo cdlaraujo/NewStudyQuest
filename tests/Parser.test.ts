@@ -26,7 +26,7 @@ describe('CampaignParser', () => {
   const campaign = new CampaignParser().parse(SAMPLE);
   const [trail1, trail2] = campaign.getTrails();
 
-  it('reads the campaign name and both trails', () => {
+  it('lê o nome da campanha e ambas as trilhas', () => {
     expect(campaign.name).toBe('Biology 101');
     expect(campaign.getTrails()).toHaveLength(2);
     expect(trail1.name).toBe('Cell Structure');
@@ -35,7 +35,7 @@ describe('CampaignParser', () => {
     expect(trail2.order).toBe(2);
   });
 
-  it('builds quiz and fill-in-the-blank quests (blank lines ignored)', () => {
+  it('constrói quests de quiz e preencher-lacunas (linhas em branco ignoradas)', () => {
     const quests = trail1.getQuests();
     expect(quests).toHaveLength(2);
 
@@ -48,11 +48,11 @@ describe('CampaignParser', () => {
     expect(quests[1].validate(['mitochondria', 'cell'])).toBe(true);
   });
 
-  it('routes post-BOSS questions into the trail boss container', () => {
-    expect(trail1.getBoss().size).toBe(0); // first trail has no BOSS section
+  it('direciona perguntas pós-BOSS para o container de boss da trilha', () => {
+    expect(trail1.getBoss().size).toBe(0); // primeira trilha não tem seção BOSS
 
     const boss = trail2.getBoss();
-    expect(trail2.getQuests()).toHaveLength(1); // the DNA quiz appears before BOSS
+    expect(trail2.getQuests()).toHaveLength(1); // o quiz de DNA aparece antes do BOSS
     expect(boss.size).toBe(2);
     expect(boss.getQuests()[0]).toBeInstanceOf(QuizQuest);
     expect(boss.getQuests()[0].validate('42')).toBe(true);
@@ -60,7 +60,7 @@ describe('CampaignParser', () => {
     expect(boss.getQuests()[1].validate(['two'])).toBe(true);
   });
 
-  it('auto-unlocks the first trail only', () => {
+  it('auto-desbloqueia apenas a primeira trilha', () => {
     expect(trail1.getState()).toBe(TrailState.UNLOCKED);
     expect(trail2.getState()).toBe(TrailState.LOCKED);
   });

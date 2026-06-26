@@ -5,9 +5,9 @@ import { normalize } from '../shared/normalize';
 const GAP_PATTERN = /\{([^}]*)\}/g;
 
 /**
- * A sentence with one or more gaps written in curly braces, e.g.
- * "The {nucleus} stores DNA.". On construction the expected words are
- * extracted in order; the original sentence is kept for display.
+ * Frase com uma ou mais lacunas escritas entre chaves, ex.:
+ * "O {núcleo} armazena DNA.". Na construção, as palavras esperadas são
+ * extraídas em ordem; a frase original é mantida para exibição.
  */
 export class FillInTheBlankQuest extends Quest {
   readonly #expectedWords: string[];
@@ -17,7 +17,7 @@ export class FillInTheBlankQuest extends Quest {
     this.#expectedWords = FillInTheBlankQuest.extractGaps(sentence);
   }
 
-  /** Pulls the words inside `{}` out of a sentence, preserving their order. */
+  /** Extrai as palavras dentro de `{}` de uma frase, preservando a ordem. */
   static extractGaps(sentence: string): string[] {
     const matches = sentence.match(GAP_PATTERN) ?? [];
     return matches.map((match) => match.slice(1, -1).trim());

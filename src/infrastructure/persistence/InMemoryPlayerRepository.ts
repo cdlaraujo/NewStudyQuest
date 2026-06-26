@@ -4,8 +4,8 @@ import { PlayerRepository } from '../../application/ports/PlayerRepository';
 export const DEFAULT_PLAYER_ID = 'player-1';
 
 /**
- * Holds the single player. The system has no auth, so everything happens as
- * "player-1", starting at level 1 with 0 XP and a 0 streak.
+ * Mantém o único jogador. O sistema não possui autenticação, portanto tudo
+ * acontece como "player-1", começando no nível 1 com 0 XP e streak 0.
  */
 export class InMemoryPlayerRepository implements PlayerRepository {
   private player: Player;

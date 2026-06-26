@@ -2,9 +2,10 @@ import { Quest } from '../quest/Quest';
 import { ReviewEntry, WeightStrategy } from './WeightStrategy';
 
 /**
- * Default review strategy: a weighted lottery. A quest's chance of being
- * picked is proportional to its weight, so the questions a player keeps getting
- * wrong come back more often. The RNG is injectable for deterministic tests.
+ * Strategy padrão de revisão: uma loteria ponderada. A chance de uma quest ser
+ * escolhida é proporcional ao seu peso, portanto as questões que o jogador
+ * continua errando reaparecem com mais frequência. O RNG é injetável para testes
+ * determinísticos.
  */
 export class WeightedRandomStrategy implements WeightStrategy {
   constructor(private readonly rng: () => number = Math.random) {}
@@ -16,7 +17,7 @@ export class WeightedRandomStrategy implements WeightStrategy {
 
     const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
     if (total <= 0) {
-      // every weight is zero — fall back to a uniform pick
+      // todos os pesos são zero — recorre a uma escolha uniforme
       const index = Math.min(entries.length - 1, Math.floor(this.rng() * entries.length));
       return entries[index].quest;
     }

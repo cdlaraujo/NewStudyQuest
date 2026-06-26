@@ -5,10 +5,10 @@ import { WeightedRandomStrategy } from './WeightedRandomStrategy';
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
- * A strategy that first ages the queue — increasing each entry's weight in
- * proportion to the whole days elapsed since its last attempt — and then
- * delegates the actual pick to another strategy (a weighted lottery by
- * default). This makes long-neglected questions resurface.
+ * Strategy que primeiro envelhece a fila — aumentando o peso de cada entrada
+ * em proporção aos dias inteiros decorridos desde a última tentativa — e então
+ * delega a escolha real a outra strategy (uma loteria ponderada por padrão).
+ * Isso faz questões negligenciadas por muito tempo ressurgirem.
  */
 export class TimeDecayWeightStrategy implements WeightStrategy {
   constructor(
@@ -18,9 +18,9 @@ export class TimeDecayWeightStrategy implements WeightStrategy {
   ) {}
 
   /**
-   * Increases each entry's weight by `daysSinceLastAttempt * decayPerDay` and
-   * refreshes its `lastAttempt`. Exposed separately so the ageing behaviour can
-   * be asserted directly.
+   * Aumenta o peso de cada entrada por `diasDesdeÚltimaTentativa * decayPerDay`
+   * e atualiza seu `lastAttempt`. Exposto separadamente para que o comportamento
+   * de envelhecimento possa ser verificado diretamente.
    */
   applyDecay(entries: ReviewEntry[]): void {
     const current = this.now();

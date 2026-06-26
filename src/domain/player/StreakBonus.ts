@@ -2,9 +2,9 @@ import { XpModifier } from './XpModifier';
 import { Player } from './Player';
 
 /**
- * Doubles XP while the player's streak bonus is active. The rule lives here,
- * outside the Player, and is composed into {@link Player.addXp} as one of the
- * injected modifiers.
+ * Dobra o XP enquanto o bônus de streak do jogador estiver ativo. A regra vive
+ * aqui, fora do Player, e é composta em {@link Player.addXp} como um dos
+ * modificadores injetados.
  */
 export class StreakBonus implements XpModifier {
   constructor(private readonly player: Player) {}

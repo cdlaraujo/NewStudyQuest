@@ -1,8 +1,8 @@
 import { Campanha } from '../../domain/campaign/Campanha';
 
 /**
- * Port for campaign persistence. Use cases depend only on this interface, never
- * on a concrete store.
+ * Port para persistência de campanha. Os casos de uso dependem apenas desta
+ * interface, nunca de um armazenamento concreto.
  */
 export interface CampaignRepository {
   save(campaign: Campanha): void;

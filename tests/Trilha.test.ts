@@ -3,12 +3,12 @@ import { BossContainer } from '../src/domain/boss/BossContainer';
 import { QuizQuest } from '../src/domain/quest/QuizQuest';
 
 describe('Trilha', () => {
-  it('starts LOCKED', () => {
+  it('começa LOCKED', () => {
     const trail = new Trilha('T', 1, [new QuizQuest('q', 'a')]);
     expect(trail.getState()).toBe(TrailState.LOCKED);
   });
 
-  it('unlocks from LOCKED, and refuses to unlock from any other state', () => {
+  it('desbloqueia a partir de LOCKED, e recusa desbloquear a partir de qualquer outro estado', () => {
     const trail = new Trilha('T', 1, [new QuizQuest('q', 'a')]);
 
     trail.unlock();
@@ -16,7 +16,7 @@ describe('Trilha', () => {
     expect(() => trail.unlock()).toThrow();
   });
 
-  it('is complete only when all quests and the boss are done', () => {
+  it('está completa apenas quando todas as quests e o boss estão concluídos', () => {
     const quiz = new QuizQuest('q', 'a');
     const bossQuiz = new QuizQuest('boss', 'b');
     const trail = new Trilha('T', 1, [quiz], new BossContainer([bossQuiz]));
@@ -25,14 +25,14 @@ describe('Trilha', () => {
     expect(trail.isCompleted()).toBe(false);
 
     quiz.complete('a');
-    expect(trail.isCompleted()).toBe(false); // boss not cleared yet
+    expect(trail.isCompleted()).toBe(false); // boss ainda não derrotado
 
     trail.getBoss().answerNext('b');
     expect(trail.isCompleted()).toBe(true);
     expect(trail.getState()).toBe(TrailState.COMPLETED);
   });
 
-  it('completes with an empty boss once all regular quests are done', () => {
+  it('completa com boss vazio assim que todas as quests normais estão concluídas', () => {
     const quiz = new QuizQuest('q', 'a');
     const trail = new Trilha('T', 1, [quiz]);
     trail.unlock();
@@ -42,7 +42,7 @@ describe('Trilha', () => {
     expect(trail.isCompleted()).toBe(true);
   });
 
-  it('cannot be completed while still LOCKED', () => {
+  it('não pode ser concluída enquanto ainda está LOCKED', () => {
     const quiz = new QuizQuest('q', 'a');
     const trail = new Trilha('T', 1, [quiz]);
     quiz.complete('a');

@@ -1,6 +1,6 @@
 import { Quest } from '../quest/Quest';
 
-/** One entry tracked by the review queue. */
+/** Uma entrada rastreada pela fila de revisão. */
 export interface ReviewEntry {
   quest: Quest;
   weight: number;
@@ -8,9 +8,9 @@ export interface ReviewEntry {
 }
 
 /**
- * Strategy that decides which quest the review queue surfaces next. The queue
- * delegates entirely to an implementation of this interface, so it never needs
- * to know how weights translate into a choice.
+ * Strategy que decide qual quest a fila de revisão apresenta a seguir. A fila
+ * delega inteiramente a uma implementação desta interface, portanto nunca precisa
+ * saber como os pesos se traduzem em uma escolha.
  */
 export interface WeightStrategy {
   select(entries: ReviewEntry[]): Quest | null;

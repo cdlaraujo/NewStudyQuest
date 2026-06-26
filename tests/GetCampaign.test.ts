@@ -9,7 +9,7 @@ Q: 2 + 2?
 R: 4`;
 
 describe('GetCampaign', () => {
-  it('returns a saved campaign by id', () => {
+  it('retorna uma campanha salva por id', () => {
     const repo = new InMemoryCampaignRepository();
     const campaign = new CampaignParser().parse(TEXT);
     repo.save(campaign);
@@ -18,7 +18,7 @@ describe('GetCampaign', () => {
     expect(useCase.execute(campaign.id!)).toBe(campaign);
   });
 
-  it('throws for an unknown id', () => {
+  it('lança erro para um id desconhecido', () => {
     const useCase = new GetCampaign(new InMemoryCampaignRepository());
 
     expect(() => useCase.execute('nope')).toThrow();

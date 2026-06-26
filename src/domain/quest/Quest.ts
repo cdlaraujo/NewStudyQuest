@@ -1,9 +1,9 @@
 import { QuestResult } from './QuestResult';
 
-/** A quiz answer is a single string; a fill-in-the-blank answer is an array. */
+/** Resposta de quiz é uma string simples; resposta de lacuna é um array. */
 export type Answer = string | string[];
 
-/** Display-friendly projection of a quest (no answers leaked). */
+/** Projeção para exibição de uma quest (sem vazar respostas). */
 export interface QuestView {
   id: string;
   type: string;
@@ -13,11 +13,11 @@ export interface QuestView {
 }
 
 /**
- * Abstract base every concrete question type extends. It owns the identity,
- * the prompt and the (externally immutable) completion flag, and defines the
- * polymorphic contract: each subclass decides how to validate an answer and
- * how much XP it awards. No code outside a subclass ever asks "what kind of
- * quest is this?" — the object answers for itself.
+ * Base abstrata que todo tipo concreto de questão estende. Ela possui a identidade,
+ * o enunciado e a flag de conclusão (imutável externamente), e define o contrato
+ * polimórfico: cada subclasse decide como validar a resposta e quanto XP concede.
+ * Nenhum código fora da subclasse pergunta "que tipo de quest é essa?" — o objeto
+ * responde por si mesmo.
  */
 export abstract class Quest {
   #completed = false;
@@ -27,21 +27,21 @@ export abstract class Quest {
     public readonly question: string,
   ) {}
 
-  /** Returns true when `answer` satisfies this quest. */
+  /** Retorna true quando `answer` satisfaz esta quest. */
   abstract validate(answer: Answer): boolean;
 
-  /** XP granted when this quest is answered correctly. */
+  /** XP concedido quando esta quest é respondida corretamente. */
   abstract getXpReward(): number;
 
-  /** The correct answer, revealed only on a wrong attempt. */
+  /** A resposta correta, revelada apenas em uma tentativa errada. */
   abstract getCorrectAnswer(): string | string[];
 
-  /** Display projection used by the presentation layer. */
+  /** Projeção para exibição usada pela camada de apresentação. */
   abstract toView(): QuestView;
 
   /**
-   * Attempts the quest. On success the quest is marked completed and a
-   * positive-XP result is returned; on failure nothing changes.
+   * Tenta responder a quest. Em caso de sucesso, a quest é marcada como concluída
+   * e um resultado com XP positivo é retornado; em caso de falha, nada muda.
    */
   complete(answer: Answer): QuestResult {
     if (this.#completed) {
@@ -54,7 +54,7 @@ export abstract class Quest {
     return QuestResult.wrong(this.getCorrectAnswer());
   }
 
-  /** Read-only view of the completion flag; it can never be set from outside. */
+  /** Visão somente-leitura da flag de conclusão; nunca pode ser definida externamente. */
   isCompleted(): boolean {
     return this.#completed;
   }

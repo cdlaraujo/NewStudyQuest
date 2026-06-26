@@ -3,9 +3,9 @@ import { Answer, Quest, QuestView } from './Quest';
 import { normalize } from '../shared/normalize';
 
 /**
- * A single-answer multiple-knowledge question. The expected answer is stored
- * privately and compared after normalisation so that casing and surrounding
- * whitespace never matter.
+ * Questão de resposta única. A resposta esperada é armazenada de forma privada
+ * e comparada após normalização, de modo que maiúsculas/minúsculas e espaços
+ * ao redor nunca importam.
  */
 export class QuizQuest extends Quest {
   readonly #answer: string;

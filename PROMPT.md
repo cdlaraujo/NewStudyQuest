@@ -1,44 +1,43 @@
-# External Chatbot Prompt (input generation)
+# Prompt para Chatbot Externo (geração de entrada)
 
-EduQuest's backend never calls an LLM. Instead, the student first uses a normal
-chatbot (ChatGPT, Claude, Gemini, …) to convert raw study material into the
-markup format below, then posts that text to `POST /api/campaigns/generate`.
+O backend do EduQuest nunca chama um LLM. Em vez disso, o estudante primeiro usa um chatbot comum (ChatGPT, Claude, Gemini, …) para converter o material de estudo bruto no formato de marcação abaixo, e então envia esse texto para `POST /api/campaigns/generate`.
 
-Copy the prompt below into any chatbot, paste your study material after it, and
-send the chatbot's plain-text output to the API.
+Copie o prompt abaixo em qualquer chatbot, cole seu material de estudo após ele e envie o texto simples gerado pelo chatbot para a API.
 
 ---
 
-You are a study-material formatter. Convert the study material I give you into a
-plain-text "campaign" using ONLY the following line prefixes. Output nothing but
-the formatted text — no explanations, no Markdown, no code fences.
+Você é um formatador de material de estudo. Converta o material de estudo que eu fornecer em uma "campanha" em texto simples usando APENAS os seguintes prefixos de linha. Produza somente o texto formatado — sem explicações, sem Markdown, sem blocos de código.
 
-Rules:
+Regras:
 
-- `CAMPANHA:` — the main title (use it exactly once, on the first line).
-- `TRILHA:` — the name of each subtopic (a "trail"). Use several.
-- `ORDEM:` — a number giving the trail's position, written on the line right
-  after its `TRILHA:`. Number trails 1, 2, 3, …
-- `Q:` — a question.
-- `R:` — the answer to the `Q:` immediately above it.
-- `L:` — a fill-in-the-blank sentence. Put each missing word in `{curly braces}`.
-  A sentence may contain more than one gap.
-- `BOSS` — on its own line, near the end of a trail. Every `Q:`/`R:`/`L:` line
-  after it (until the next `TRILHA:`) belongs to that trail's boss challenge.
+- `CAMPANHA:` — o título principal (use exatamente uma vez, na primeira linha).
+- `TRILHA:` — o nome de cada subtópico (uma "trilha"). Use vários.
+- `ORDEM:` — um número que indica a posição da trilha, escrito na linha logo após seu `TRILHA:`. Numere as trilhas 1, 2, 3, …
+- `Q:` — uma pergunta. Deve ser seguida imediatamente por `R:` ou `A:`.
+- `R:` — a resposta curta em texto livre para o `Q:` imediatamente acima.
+- `A:` — opções de múltipla escolha para o `Q:` imediatamente acima. Escreva todas as opções em uma linha dentro de chaves, separadas por vírgulas. Marque a opção correta com o prefixo `*`: `A: {Errada, *Correta, Também errada}`
+- `L:` — uma frase para preencher lacunas. Coloque cada palavra ausente em `{chaves}`. Uma frase pode conter mais de uma lacuna.
+- `BOSS` — em sua própria linha, perto do final de uma trilha. Cada linha `Q:`/`R:`/`A:`/`L:` após ela (até o próximo `TRILHA:`) pertence ao desafio boss dessa trilha.
 
-Guidelines:
+Notação matemática:
 
-- Group related questions under the same `TRILHA:`.
-- Put 3–6 normal questions before the `BOSS` of each trail.
-- Make boss questions slightly harder — they summarise the trail.
-- Keep answers short and unambiguous (a single word or short phrase).
-- Output only plain text.
+- Fórmulas inline entre `$…$`: ex. `Q: Qual é $E = mc^2$?`
+- Fórmulas em bloco (display) entre `$$…$$`.
+- Use notação LaTeX padrão dentro dos delimitadores.
 
-Study material:
+Diretrizes:
 
-<paste your notes here>
+- Agrupe perguntas relacionadas sob o mesmo `TRILHA:`.
+- Coloque 3–6 perguntas normais antes do `BOSS` de cada trilha. Misture os tipos de perguntas: use `R:` para respostas curtas em texto livre, `A:` para múltipla escolha e `L:` para preencher lacunas.
+- Faça as perguntas do boss um pouco mais difíceis — elas resumem a trilha.
+- Mantenha as respostas de `R:` curtas e sem ambiguidade (uma única palavra ou frase curta).
+- Para perguntas `A:`, inclua 3–4 opções plausíveis e marque exatamente uma com `*`.
+- Produza apenas texto simples.
+
+Material de estudo:
+
+<cole suas anotações aqui>
 
 ---
 
-See [examples/sample-campaign.txt](examples/sample-campaign.txt) for a complete
-example of the expected output.
+Veja [examples/sample-campaign.txt](examples/sample-campaign.txt) para um exemplo completo do resultado esperado.

@@ -14,11 +14,11 @@ export interface UseCases {
   getCampaign: GetCampaign;
 }
 
-/** Wires the three REST endpoints to the use cases. No business logic here. */
+/** Conecta os endpoints REST aos casos de uso. Nenhuma lógica de negócio aqui. */
 export function createRouter(useCases: UseCases): Router {
   const router = Router();
 
-  // POST /api/campaigns/generate  { text }
+  // POST /api/campaigns/generate  { text }  — gera uma campanha a partir de texto
   router.post('/campaigns/generate', (req: Request, res: Response) => {
     const text = (req.body ?? {}).text;
     if (typeof text !== 'string' || text.trim() === '') {
@@ -28,7 +28,7 @@ export function createRouter(useCases: UseCases): Router {
     return res.status(201).json(campaignToDto(campaign));
   });
 
-  // POST /api/campaigns/:campaignId/quests/:questId/answer  { answer }
+  // POST /api/campaigns/:campaignId/quests/:questId/answer  { answer }  — responde uma quest
   router.post('/campaigns/:campaignId/quests/:questId/answer', (req: Request, res: Response) => {
     const { campaignId, questId } = req.params;
     const answer = (req.body ?? {}).answer;
@@ -45,7 +45,7 @@ export function createRouter(useCases: UseCases): Router {
     }
   });
 
-  // GET /api/player/review
+  // GET /api/player/review  — próxima quest da fila de revisão
   router.get('/player/review', (_req: Request, res: Response) => {
     const quest = useCases.getNextReview.execute();
     if (!quest) {
@@ -54,12 +54,12 @@ export function createRouter(useCases: UseCases): Router {
     return res.json(questToDto(quest));
   });
 
-  // GET /api/player
+  // GET /api/player  — estado atual do jogador
   router.get('/player', (_req: Request, res: Response) => {
     return res.json(playerToDto(useCases.getPlayer.execute()));
   });
 
-  // GET /api/campaigns/:campaignId
+  // GET /api/campaigns/:campaignId  — estrutura atual da campanha
   router.get('/campaigns/:campaignId', (req: Request, res: Response) => {
     try {
       const campaign = useCases.getCampaign.execute(req.params.campaignId);

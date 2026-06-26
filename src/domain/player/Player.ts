@@ -1,7 +1,7 @@
 import { LevelResult } from './LevelResult';
 import { XpModifier } from './XpModifier';
 
-/** Injectable clock so streak/bonus logic is deterministic under test. */
+/** Relógio injetável para que a lógica de streak/bônus seja determinística nos testes. */
 export type Clock = () => Date;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -9,10 +9,10 @@ const XP_PER_LEVEL = 100;
 const STREAK_BONUS_THRESHOLD = 7;
 
 /**
- * The player aggregate. Every numeric field is a true private (#) field, so XP,
- * level and streak can never be assigned from outside — they only change
- * through the methods below. The Player holds no "double XP on day 7" logic;
- * that rule is supplied as an {@link XpModifier}.
+ * O agregado do jogador. Todo campo numérico é um campo verdadeiramente privado (#),
+ * portanto XP, nível e streak nunca podem ser atribuídos externamente — eles só
+ * mudam pelos métodos abaixo. O Player não contém lógica de "dobrar XP no dia 7";
+ * essa regra é fornecida como um {@link XpModifier}.
  */
 export class Player {
   #xp = 0;
@@ -43,9 +43,9 @@ export class Player {
   }
 
   /**
-   * The only way to change XP. Each modifier is applied in sequence to the base
-   * amount, the result is added to the running total, then the player levels up
-   * as many times as the accumulated XP allows (threshold = level * 100).
+   * A única forma de alterar o XP. Cada modificador é aplicado em sequência ao valor
+   * base, o resultado é adicionado ao total acumulado e então o jogador sobe de nível
+   * quantas vezes o XP acumulado permitir (limiar = nível * 100).
    */
   addXp(baseXp: number, modifiers: XpModifier[] = []): LevelResult {
     const gained = modifiers.reduce((xp, modifier) => modifier.apply(xp), baseXp);
@@ -63,9 +63,9 @@ export class Player {
   }
 
   /**
-   * Records activity for "today". Same-day or next-day activity extends the
-   * streak; a gap of two or more days resets it to 1. Reaching 7 activates a
-   * 24-hour bonus window.
+   * Registra atividade para "hoje". Atividade no mesmo dia ou no dia seguinte
+   * estende o streak; uma ausência de dois ou mais dias o reinicia para 1.
+   * Atingir 7 ativa uma janela bônus de 24 horas.
    */
   incrementStreak(): void {
     const now = this.#clock();
@@ -93,7 +93,7 @@ export class Player {
     this.#streakBonusExpiry = null;
   }
 
-  /** True while the streak bonus is switched on and has not expired. */
+  /** True enquanto o bônus de streak está ativo e não expirou. */
   isStreakBonusActive(): boolean {
     if (!this.#streakBonusActive || !this.#streakBonusExpiry) {
       return false;

@@ -1,6 +1,6 @@
 'use strict';
 
-// ---- Sample campaign (matches examples/sample-campaign.txt) ----
+// ---- Campanha de exemplo (corresponde a examples/sample-campaign.txt) ----
 const SAMPLE = `CAMPANHA: Cell Biology Basics
 
 TRILHA: The Cell
@@ -27,17 +27,17 @@ Q: Which base pairs with adenine in DNA?
 A: {Guanine, Cytosine, *Thymine, Uracil}
 L: The double helix was discovered by Watson and {Crick}.`;
 
-// ---- App state ----
+// ---- Estado da aplicação ----
 const state = {
   campaignId: null,
   campaign: null,
   currentTrailOrder: null,
   currentQuestIndex: 0,
   bossIndex: 0,
-  completed: new Set(), // quest ids answered correctly this session
+  completed: new Set(), // ids das quests respondidas corretamente nesta sessão
 };
 
-// ---- DOM helpers ----
+// ---- Utilitários DOM ----
 const $ = (id) => document.getElementById(id);
 const esc = (s) =>
   String(s).replace(/[&<>"']/g, (c) =>
@@ -76,7 +76,7 @@ const fetchReview = () => api('GET', '/player/review');
 const sendAnswer = (campaignId, questId, answer) =>
   api('POST', `/campaigns/${campaignId}/quests/${questId}/answer`, { answer });
 
-// ---- HUD ----
+// ---- HUD (painel de status) ----
 async function refreshHud() {
   const { data } = await fetchPlayer();
   if (!data) return;
@@ -89,7 +89,7 @@ async function refreshHud() {
   $('hud-bonus').hidden = !data.streakBonusActive;
 }
 
-// ---- Generate flow ----
+// ---- Fluxo de geração ----
 async function onGenerate() {
   const text = $('source').value.trim();
   const errEl = $('create-error');
@@ -115,12 +115,12 @@ async function onGenerate() {
   render();
 }
 
-// ---- Helpers ----
+// ---- Auxiliares ----
 function formatAnswer(a) {
   return Array.isArray(a) ? a.join(', ') : (a ?? '');
 }
 
-// ---- Math rendering ----
+// ---- Renderização matemática ----
 function renderMath(el) {
   if (typeof renderMathInElement === 'function') {
     renderMathInElement(el, {
@@ -133,7 +133,7 @@ function renderMath(el) {
   }
 }
 
-// ---- Rendering ----
+// ---- Renderização ----
 function currentTrail() {
   if (!state.campaign) return null;
   return state.campaign.trails.find((t) => t.state === 'UNLOCKED') || null;
@@ -145,7 +145,7 @@ function render() {
 
   const trail = currentTrail();
   if (!trail) {
-    // no unlocked trail left → campaign cleared
+    // nenhuma trilha desbloqueada restante → campanha concluída
     $('trail-title').textContent = '';
     $('quests').innerHTML = '';
     $('boss').hidden = true;
@@ -236,17 +236,18 @@ function renderCurrentQuest(trail) {
   questsEl.innerHTML = '';
   $('boss').hidden = true;
 
-  const idx = state.currentQuestIndex;
-  if (idx >= trail.quests.length) {
+  // Encontra a primeira quest ainda não respondida corretamente
+  const nextIdx = trail.quests.findIndex((q) => !state.completed.has(q.id));
+  if (nextIdx === -1) {
     renderBoss(trail);
     return;
   }
 
   const progress = document.createElement('p');
   progress.className = 'quest-progress muted';
-  progress.textContent = `Question ${idx + 1} of ${trail.quests.length}`;
+  progress.textContent = `Question ${nextIdx + 1} of ${trail.quests.length}`;
   questsEl.appendChild(progress);
-  questsEl.appendChild(questCard(trail.quests[idx], trail));
+  questsEl.appendChild(questCard(trail.quests[nextIdx], trail));
   renderMath(questsEl);
 }
 
@@ -254,6 +255,7 @@ function renderBoss(trail) {
   const bossEl = $('boss');
   if (!trail.boss || trail.boss.length === 0) {
     bossEl.hidden = true;
+    maybeAdvanceTrail(); // trail may already be complete on the server
     return;
   }
   bossEl.hidden = false;
@@ -268,7 +270,7 @@ function renderBoss(trail) {
   renderMath(bossEl);
 }
 
-// ---- Answering ----
+// ---- Resposta ----
 async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss }) {
   const feedback = card.querySelector('.feedback');
   const answer = isMC
@@ -310,7 +312,6 @@ async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss
     if (data.leveledUp) toast(`⬆️ Level up! You are now level ${data.newLevel}`, true);
     else toast(`✓ +${data.xpGained} XP`);
     setTimeout(() => {
-      state.currentQuestIndex += 1;
       const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
       renderCurrentQuest(trail);
     }, 800);
@@ -318,7 +319,6 @@ async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss
     feedback.className = 'feedback bad';
     feedback.textContent = `✗ Not quite — answer: ${formatAnswer(data.correctAnswer)}. Added to review.`;
     setTimeout(() => {
-      state.currentQuestIndex += 1;
       const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
       renderCurrentQuest(trail);
     }, 1200);
@@ -354,7 +354,7 @@ async function handleBossResult(data, trail, feedback) {
   }
 }
 
-// Re-fetch the campaign; if the unlocked trail changed, re-render the view.
+// Recarrega a campanha; se a trilha desbloqueada mudou, re-renderiza a view.
 async function maybeAdvanceTrail() {
   const { data } = await fetchCampaign(state.campaignId);
   if (!data) return;
@@ -369,7 +369,7 @@ async function maybeAdvanceTrail() {
   }
 }
 
-// ---- Review ----
+// ---- Revisão ----
 async function onReview() {
   const panel = $('review-panel');
   const { status, data } = await fetchReview();
@@ -385,7 +385,7 @@ async function onReview() {
   renderMath(panel);
 }
 
-// ---- Wire up ----
+// ---- Inicialização ----
 window.addEventListener('DOMContentLoaded', () => {
   $('source').value = SAMPLE;
   $('load-sample').addEventListener('click', () => {

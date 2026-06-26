@@ -2,18 +2,18 @@ import { Campanha } from '../../domain/campaign/Campanha';
 import { CampaignRepository } from '../ports/CampaignRepository';
 
 /**
- * Port for whatever turns raw markup text into a campaign. Defined here so the
- * use case depends on an abstraction; the concrete parser lives in
- * infrastructure.
+ * Port para o que quer que converta texto de marcação bruto em uma campanha.
+ * Definido aqui para que o caso de uso dependa de uma abstração; o parser
+ * concreto vive na infraestrutura.
  */
 export interface CampaignTextParser {
   parse(rawText: string): Campanha;
 }
 
 /**
- * Parses the chatbot-formatted text into a campaign and persists it. The
- * backend never calls an LLM — it only parses text the student already
- * produced with an external chatbot.
+ * Analisa o texto formatado pelo chatbot em uma campanha e a persiste. O
+ * backend nunca chama um LLM — ele apenas analisa o texto que o estudante
+ * já produziu com um chatbot externo.
  */
 export class GenerateCampaign {
   constructor(

@@ -8,20 +8,20 @@ import { MultipleChoiceQuest } from '../../domain/quest/MultipleChoiceQuest';
 import { CampaignTextParser } from '../../application/usecases/GenerateCampaign';
 
 /**
- * Translates the chatbot markup into domain objects. All the prefix rules live
- * here in infrastructure; the domain classes never know their data came from
- * text. Parsing is line-based and indentation-insensitive:
+ * Traduz a marcação do chatbot em objetos de domínio. Todas as regras de prefixo
+ * vivem aqui na infraestrutura; as classes de domínio nunca sabem que seus dados
+ * vieram de texto. O parsing é baseado em linhas e insensível a indentação:
  *
- *   CAMPANHA: <name>     start a campaign
- *   TRILHA:   <name>     start a trail (finalises the previous one)
- *   ORDEM:    <number>   set the current trail's order
- *   Q: <text>                    buffer a question
- *   R: <answer>                  turn the buffered Q + this R into a QuizQuest
- *   A: {opt, *correct, opt}      turn the buffered Q + this A into a MultipleChoiceQuest
- *   L: <sentence {gap}>          a fill-in-the-blank sentence
- *   BOSS                         subsequent Q/L/A go into the trail's boss
+ *   CAMPANHA: <nome>     inicia uma campanha
+ *   TRILHA:   <nome>     inicia uma trilha (finaliza a anterior)
+ *   ORDEM:    <número>   define a ordem da trilha atual
+ *   Q: <texto>                   armazena uma pergunta
+ *   R: <resposta>                transforma o Q armazenado + este R em uma QuizQuest
+ *   A: {opt, *correto, opt}      transforma o Q armazenado + este A em uma MultipleChoiceQuest
+ *   L: <frase {lacuna}>          uma frase para preencher lacunas
+ *   BOSS                         Q/L/A subsequentes vão para o boss da trilha
  *
- * Blank and unrecognised lines are ignored.
+ * Linhas em branco e não reconhecidas são ignoradas.
  */
 export class CampaignParser implements CampaignTextParser {
   parse(text: string): Campanha {
@@ -55,7 +55,7 @@ export class CampaignParser implements CampaignTextParser {
     for (const rawLine of text.split(/\r?\n/)) {
       const line = rawLine.trim();
       if (line === '') {
-        continue; // blank lines are ignored
+        continue; // linhas em branco são ignoradas
       }
 
       if (line.startsWith('CAMPANHA:')) {

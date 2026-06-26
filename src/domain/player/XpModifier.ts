@@ -1,9 +1,9 @@
 /**
- * A pluggable rule that transforms an XP amount before it is awarded.
- * Modifiers are composed (applied in sequence) by {@link Player.addXp}, the
- * same way a pricing service composes fees. The Player itself contains no
- * conditional bonus logic — every such rule is an XpModifier injected from
- * outside.
+ * Regra plugável que transforma um valor de XP antes de ser concedido.
+ * Os modificadores são compostos (aplicados em sequência) por {@link Player.addXp},
+ * da mesma forma que um serviço de preços compõe taxas. O Player em si não contém
+ * lógica condicional de bônus — cada uma dessas regras é um XpModifier injetado
+ * externamente.
  */
 export interface XpModifier {
   apply(xp: number): number;

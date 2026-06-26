@@ -4,7 +4,7 @@ import { ReviewQueue } from '../../domain/review/ReviewQueue';
 import { XpModifier } from '../../domain/player/XpModifier';
 import { Answer } from '../../domain/quest/Quest';
 
-/** Weight added to the review queue the first time a (non-boss) quest is missed. */
+/** Peso adicionado à fila de revisão na primeira vez que uma quest (não-boss) é errada. */
 export const REVIEW_ERROR_WEIGHT = 5;
 
 export interface AnswerResult {
@@ -17,14 +17,15 @@ export interface AnswerResult {
 }
 
 /**
- * Handles a single answer attempt. It locates the quest inside the current
- * unlocked trail (regular quests first, then the boss). The quest objects
- * decide correctness and reward — this use case never inspects quest types.
+ * Processa uma única tentativa de resposta. Localiza a quest dentro da trilha
+ * desbloqueada atual (quests normais primeiro, depois o boss). Os objetos de quest
+ * decidem a correção e a recompensa — este caso de uso nunca inspeciona os tipos
+ * de quest.
  *
- * - Correct: award XP (through the player's modifiers, e.g. streak bonus),
- *   bump the streak, and possibly unlock the next trail.
- * - Wrong, regular quest: enqueue it for review.
- * - Wrong, boss quest: enqueue it for review; the boss also resets the trail.
+ * - Correto: concede XP (pelos modificadores do jogador, ex.: bônus de streak),
+ *   incrementa o streak e possivelmente desbloqueia a próxima trilha.
+ * - Errado, quest normal: enfileira para revisão.
+ * - Errado, quest do boss: enfileira para revisão; o boss também reinicia a trilha.
  */
 export class AnswerQuest {
   constructor(
@@ -58,10 +59,10 @@ export class AnswerQuest {
       throw new Error(`Quest ${questId} not found in the current unlocked trail`);
     }
 
-    // Capture current boss quest before answerNext() may reset the cursor.
+    // Captura a quest atual do boss antes de answerNext() possivelmente reiniciar o cursor.
     const currentBossQuest = isBossQuest ? boss.getCurrentQuest() : null;
 
-    // The quest/boss decides correctness and how much XP the attempt is worth.
+    // A quest/boss decide a correção e quanto XP a tentativa vale.
     const result = regularQuest ? regularQuest.complete(answer) : boss.answerNext(answer);
 
     let xpGained = 0;
@@ -75,7 +76,7 @@ export class AnswerQuest {
       newLevel = levelResult.newLevel;
       leveledUp = levelResult.didLevelUp;
       player.incrementStreak();
-      campaign.completeCurrentTrail(); // unlocks the next trail if this finished one
+      campaign.completeCurrentTrail(); // desbloqueia a próxima trilha se esta foi concluída
     } else {
       player.resetStreak();
       const failedQuest = regularQuest ?? currentBossQuest;

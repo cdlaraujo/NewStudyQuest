@@ -1,7 +1,7 @@
 /**
- * Canonical text normalisation used when comparing a player's answer with the
- * expected answer: trims surrounding whitespace and lowercases. Keeping it in
- * one place guarantees every quest type compares answers the same way.
+ * Normalização canônica de texto usada ao comparar a resposta do jogador com a
+ * resposta esperada: remove espaços ao redor e converte para minúsculas. Mantê-la
+ * em um único lugar garante que todo tipo de quest compare respostas da mesma forma.
  */
 export function normalize(value: string): string {
   return value.trim().toLowerCase();

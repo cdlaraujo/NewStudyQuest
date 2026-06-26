@@ -1,7 +1,7 @@
 import { QuizQuest } from '../src/domain/quest/QuizQuest';
 
 describe('QuizQuest', () => {
-  it('normalises casing and whitespace when validating', () => {
+  it('normaliza maiúsculas/minúsculas e espaços ao validar', () => {
     const quest = new QuizQuest('Where is DNA stored?', 'Nucleus');
 
     expect(quest.validate('nucleus')).toBe(true);
@@ -9,19 +9,19 @@ describe('QuizQuest', () => {
     expect(quest.validate('Nucleus')).toBe(true);
   });
 
-  it('rejects a wrong answer', () => {
+  it('rejeita uma resposta errada', () => {
     const quest = new QuizQuest('Where is DNA stored?', 'Nucleus');
 
     expect(quest.validate('mitochondria')).toBe(false);
   });
 
-  it('rejects an array answer (quiz answers are single strings)', () => {
+  it('rejeita resposta em array (respostas de quiz são strings simples)', () => {
     const quest = new QuizQuest('Where is DNA stored?', 'Nucleus');
 
     expect(quest.validate(['nucleus'])).toBe(false);
   });
 
-  it('marks itself completed only after a correct attempt', () => {
+  it('marca-se como concluída apenas após uma tentativa correta', () => {
     const quest = new QuizQuest('2 + 2?', '4');
 
     expect(quest.isCompleted()).toBe(false);
@@ -37,7 +37,7 @@ describe('QuizQuest', () => {
     expect(quest.isCompleted()).toBe(true);
   });
 
-  it('awards 10 XP', () => {
+  it('concede 10 XP', () => {
     expect(new QuizQuest('q', 'a').getXpReward()).toBe(10);
   });
 });

@@ -4,9 +4,10 @@ import { Quest, QuestView } from '../../domain/quest/Quest';
 import { Player } from '../../domain/player/Player';
 
 /**
- * Maps domain objects to plain JSON-safe DTOs for HTTP responses. Quests expose
- * their own display projection via toView(), so no `instanceof`/type switching
- * is needed here, and correct answers are never serialised.
+ * Mapeia objetos de domínio para DTOs simples e seguros para JSON em respostas HTTP.
+ * As quests expõem sua própria projeção de exibição via toView(), portanto nenhum
+ * `instanceof`/type switching é necessário aqui, e as respostas corretas nunca são
+ * serializadas.
  */
 
 export function questToDto(quest: Quest): QuestView {

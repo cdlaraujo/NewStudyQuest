@@ -9,7 +9,7 @@ Q: 2 + 2?
 R: 4`;
 
 describe('GenerateCampaign', () => {
-  it('parses the text and persists the campaign in the repository', () => {
+  it('analisa o texto e persiste a campanha no repositório', () => {
     const repo = new InMemoryCampaignRepository();
     const useCase = new GenerateCampaign(new CampaignParser(), repo);
 

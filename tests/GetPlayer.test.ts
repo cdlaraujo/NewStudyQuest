@@ -6,14 +6,14 @@ import {
 import { Player } from '../src/domain/player/Player';
 
 describe('GetPlayer', () => {
-  it('returns the stored player', () => {
+  it('retorna o jogador armazenado', () => {
     const player = new Player(DEFAULT_PLAYER_ID);
     const useCase = new GetPlayer(new InMemoryPlayerRepository(player), DEFAULT_PLAYER_ID);
 
     expect(useCase.execute()).toBe(player);
   });
 
-  it('throws when the player is missing', () => {
+  it('lança erro quando o jogador não existe', () => {
     const repo = new InMemoryPlayerRepository(new Player(DEFAULT_PLAYER_ID));
     const useCase = new GetPlayer(repo, 'someone-else');
 
