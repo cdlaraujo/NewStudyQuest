@@ -1,25 +1,24 @@
-CAMPANHA: Cell Biology Basics
+CAMPANHA: Noções Básicas de Biologia Celular
 
-TRILHA: The Cell
+TRILHA: A Célula
 ORDEM: 1
-Q: Which organelle stores the cell's genetic material?
-R: Nucleus
-Q: Which organelle is the powerhouse of the cell?
-A: {Cell wall, *Mitochondria, Ribosome, Nucleus}
-L: The {nucleus} stores DNA while ribosomes build {proteins}.
-BOSS
-Q: What surrounds and protects the whole cell?
-R: Cell membrane
-L: Plant cells additionally have a rigid {cell wall}.
+P: Qual organela armazena o material genético da célula?
+R: Núcleo
+P: Qual organela é a central de energia da célula?
+R: {Parede celular, *Mitocôndria, Ribossomo, Núcleo}
+L: O {núcleo} armazena o DNA, enquanto os ribossomos produzem {proteínas}.
+CHEFE
+P: O que envolve e protege toda a célula?
+R: Membrana celular
+L: As células vegetais possuem, adicionalmente, uma {parede celular} rígida.
 
-TRILHA: DNA and Genetics
+TRILHA: DNA e Genética
 ORDEM: 2
-Q: How many strands does a DNA double helix have?
+P: Quantas fitas possui a dupla hélice de DNA?
 R: 2
-Q: Which molecule carries genetic information from DNA to ribosomes?
-A: {tRNA, rRNA, *mRNA, snRNA}
-L: DNA is made of repeating units called {nucleotides}.
+P: Qual molécula transporta a informação genética do DNA para os ribossomos?
+R: {tRNA, rRNA, *mRNA, snRNA}
+L: O DNA é composto por unidades repetitivas chamadas {nucleotídeos}.
 BOSS
-Q: Which base pairs with adenine in DNA?
-A: {Guanine, Cytosine, *Thymine, Uracil}
-L: The double helix was discovered by Watson and {Crick}.
+P: Qual base se pareia com a adenina no DNA?
+R: {Guanina, Citosina, *Timina, Uracila}
