@@ -13,6 +13,7 @@ export interface AnswerResult {
   newLevel: number;
   leveledUp: boolean;
   streak: number;
+  correctAnswer?: string | string[];
 }
 
 /**
@@ -23,8 +24,7 @@ export interface AnswerResult {
  * - Correct: award XP (through the player's modifiers, e.g. streak bonus),
  *   bump the streak, and possibly unlock the next trail.
  * - Wrong, regular quest: enqueue it for review.
- * - Wrong, boss quest: nothing is enqueued (boss failures never go to review);
- *   the boss restarts itself.
+ * - Wrong, boss quest: enqueue it for review; the boss also resets the trail.
  */
 export class AnswerQuest {
   constructor(
@@ -58,6 +58,9 @@ export class AnswerQuest {
       throw new Error(`Quest ${questId} not found in the current unlocked trail`);
     }
 
+    // Capture current boss quest before answerNext() may reset the cursor.
+    const currentBossQuest = isBossQuest ? boss.getCurrentQuest() : null;
+
     // The quest/boss decides correctness and how much XP the attempt is worth.
     const result = regularQuest ? regularQuest.complete(answer) : boss.answerNext(answer);
 
@@ -66,8 +69,7 @@ export class AnswerQuest {
     let leveledUp = false;
 
     if (result.success) {
-      // Regular quests award getXpReward(); the boss puts the reward in result.xp.
-      const reward = regularQuest ? regularQuest.getXpReward() : result.xp;
+      const reward = result.xp;
       const levelResult = player.addXp(reward, this.modifiers);
       xpGained = levelResult.xpGained;
       newLevel = levelResult.newLevel;
@@ -76,9 +78,9 @@ export class AnswerQuest {
       campaign.completeCurrentTrail(); // unlocks the next trail if this finished one
     } else {
       player.resetStreak();
-      if (regularQuest) {
-        // Only non-boss failures are queued for review.
-        this.reviewQueue.enqueue(regularQuest, REVIEW_ERROR_WEIGHT);
+      const failedQuest = regularQuest ?? currentBossQuest;
+      if (failedQuest) {
+        this.reviewQueue.enqueue(failedQuest, REVIEW_ERROR_WEIGHT);
       }
     }
 
@@ -91,6 +93,7 @@ export class AnswerQuest {
       newLevel,
       leveledUp,
       streak: player.getStreak(),
+      correctAnswer: result.success ? undefined : result.correctAnswer,
     };
   }
 }

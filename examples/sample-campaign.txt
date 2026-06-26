@@ -5,7 +5,7 @@ ORDEM: 1
 Q: Which organelle stores the cell's genetic material?
 R: Nucleus
 Q: Which organelle is the powerhouse of the cell?
-R: Mitochondria
+A: {Cell wall, *Mitochondria, Ribosome, Nucleus}
 L: The {nucleus} stores DNA while ribosomes build {proteins}.
 BOSS
 Q: What surrounds and protects the whole cell?
@@ -16,7 +16,10 @@ TRILHA: DNA and Genetics
 ORDEM: 2
 Q: How many strands does a DNA double helix have?
 R: 2
+Q: Which molecule carries genetic information from DNA to ribosomes?
+A: {tRNA, rRNA, *mRNA, snRNA}
 L: DNA is made of repeating units called {nucleotides}.
 BOSS
 Q: Which base pairs with adenine in DNA?
-R: Thymine
+A: {Guanine, Cytosine, *Thymine, Uracil}
+L: The double helix was discovered by Watson and {Crick}.

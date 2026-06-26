@@ -19,6 +19,15 @@ BOSS
 Q: Boss question?
 R: win`;
 
+const BOSS_RESTART_TEXT = `CAMPANHA: Boss Restart Test
+TRILHA: T1
+ORDEM: 1
+BOSS
+Q: First boss question?
+R: correct1
+Q: Second boss question?
+R: correct2`;
+
 describe('AnswerQuest', () => {
   const clock = () => new Date('2026-06-15T08:00:00');
 
@@ -75,11 +84,16 @@ describe('AnswerQuest', () => {
     expect(reviewQueue.getEntries()[0].weight).toBe(5);
   });
 
-  it('never enqueues a boss failure', () => {
+  it('grants 0 XP when a completed regular quest is answered again', () => {
+    expect(useCase.execute(campaign.id!, quizId, '4')).toMatchObject({ correct: true, xpGained: 10 });
+    expect(useCase.execute(campaign.id!, quizId, '4')).toMatchObject({ correct: true, xpGained: 0 });
+  });
+
+  it('enqueues a boss failure for review', () => {
     const result = useCase.execute(campaign.id!, bossQuestId, 'nope');
 
     expect(result.correct).toBe(false);
-    expect(reviewQueue.isEmpty()).toBe(true);
+    expect(reviewQueue.size()).toBe(1);
   });
 
   it('applies the streak bonus modifier when the bonus is active', () => {
@@ -89,5 +103,56 @@ describe('AnswerQuest', () => {
     const result = useCase.execute(campaign.id!, quizId, '4');
 
     expect(result.xpGained).toBe(20); // 10 base, doubled by the active streak bonus
+  });
+});
+
+describe('AnswerQuest – boss restart', () => {
+  const clock = () => new Date('2026-06-15T08:00:00');
+
+  let useCase: AnswerQuest;
+  let campaignId: string;
+  let bossQ1Id: string;
+  let bossQ2Id: string;
+  let trail: ReturnType<Campanha['getCurrentUnlockedTrail']>;
+
+  beforeEach(() => {
+    const campaignRepo = new InMemoryCampaignRepository();
+    const campaign = new CampaignParser().parse(BOSS_RESTART_TEXT);
+    campaignRepo.save(campaign);
+    campaignId = campaign.id!;
+
+    const player = new Player(DEFAULT_PLAYER_ID, clock);
+    const playerRepo = new InMemoryPlayerRepository(player);
+    const reviewQueue = new ReviewQueue();
+
+    useCase = new AnswerQuest(campaignRepo, playerRepo, reviewQueue, [], DEFAULT_PLAYER_ID);
+
+    trail = campaign.getCurrentUnlockedTrail();
+    const bossQuests = trail!.getBoss().getQuests();
+    bossQ1Id = bossQuests[0].id;
+    bossQ2Id = bossQuests[1].id;
+  });
+
+  it('restarts boss from Q1 after a mid-run wrong answer', () => {
+    // Q1 correct — intermediate, cursor → 1
+    expect(useCase.execute(campaignId, bossQ1Id, 'correct1')).toMatchObject({
+      correct: true,
+      xpGained: 0,
+    });
+
+    // Q2 wrong — cursor resets to 0
+    expect(useCase.execute(campaignId, bossQ2Id, 'WRONG')).toMatchObject({ correct: false });
+    expect(trail!.getBoss().getCurrentQuest()?.question).toBe('First boss question?');
+
+    // Q1 correct again — restart worked
+    expect(useCase.execute(campaignId, bossQ1Id, 'correct1')).toMatchObject({
+      correct: true,
+      xpGained: 0,
+    });
+
+    // Q2 correct — boss defeated
+    const final = useCase.execute(campaignId, bossQ2Id, 'correct2');
+    expect(final).toMatchObject({ correct: true, xpGained: 50 });
+    expect(trail!.getBoss().isComplete()).toBe(true);
   });
 });

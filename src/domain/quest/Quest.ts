@@ -9,6 +9,7 @@ export interface QuestView {
   type: string;
   prompt: string;
   gaps?: number;
+  options?: string[];
 }
 
 /**
@@ -32,6 +33,9 @@ export abstract class Quest {
   /** XP granted when this quest is answered correctly. */
   abstract getXpReward(): number;
 
+  /** The correct answer, revealed only on a wrong attempt. */
+  abstract getCorrectAnswer(): string | string[];
+
   /** Display projection used by the presentation layer. */
   abstract toView(): QuestView;
 
@@ -40,11 +44,14 @@ export abstract class Quest {
    * positive-XP result is returned; on failure nothing changes.
    */
   complete(answer: Answer): QuestResult {
+    if (this.#completed) {
+      return this.validate(answer) ? new QuestResult(true, 0) : QuestResult.wrong(this.getCorrectAnswer());
+    }
     if (this.validate(answer)) {
       this.#completed = true;
       return new QuestResult(true, this.getXpReward());
     }
-    return new QuestResult(false, 0);
+    return QuestResult.wrong(this.getCorrectAnswer());
   }
 
   /** Read-only view of the completion flag; it can never be set from outside. */

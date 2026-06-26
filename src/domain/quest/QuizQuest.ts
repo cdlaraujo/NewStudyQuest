@@ -26,6 +26,10 @@ export class QuizQuest extends Quest {
     return 10;
   }
 
+  getCorrectAnswer(): string {
+    return this.#answer;
+  }
+
   toView(): QuestView {
     return { id: this.id, type: 'quiz', prompt: this.question };
   }

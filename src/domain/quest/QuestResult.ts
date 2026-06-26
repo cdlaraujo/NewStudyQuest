@@ -6,13 +6,14 @@ export class QuestResult {
   constructor(
     public readonly success: boolean,
     public readonly xp: number,
+    public readonly correctAnswer?: string | string[],
   ) {}
 
   static correct(xp: number): QuestResult {
     return new QuestResult(true, xp);
   }
 
-  static wrong(): QuestResult {
-    return new QuestResult(false, 0);
+  static wrong(correctAnswer?: string | string[]): QuestResult {
+    return new QuestResult(false, 0, correctAnswer);
   }
 }

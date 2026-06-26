@@ -51,7 +51,7 @@ export class BossContainer {
     const result = this.#quests[this.#current].complete(answer);
     if (!result.success) {
       this.#current = 0; // any mistake sends the player back to the start
-      return QuestResult.wrong();
+      return QuestResult.wrong(result.correctAnswer);
     }
 
     this.#current += 1;

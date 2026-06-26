@@ -4,6 +4,7 @@ import { BossContainer } from '../../domain/boss/BossContainer';
 import { Quest } from '../../domain/quest/Quest';
 import { QuizQuest } from '../../domain/quest/QuizQuest';
 import { FillInTheBlankQuest } from '../../domain/quest/FillInTheBlankQuest';
+import { MultipleChoiceQuest } from '../../domain/quest/MultipleChoiceQuest';
 import { CampaignTextParser } from '../../application/usecases/GenerateCampaign';
 
 /**
@@ -14,10 +15,11 @@ import { CampaignTextParser } from '../../application/usecases/GenerateCampaign'
  *   CAMPANHA: <name>     start a campaign
  *   TRILHA:   <name>     start a trail (finalises the previous one)
  *   ORDEM:    <number>   set the current trail's order
- *   Q: <text>            buffer a question
- *   R: <answer>          turn the buffered Q + this R into a QuizQuest
- *   L: <sentence {gap}>  a fill-in-the-blank sentence
- *   BOSS                 subsequent Q/L go into the trail's boss
+ *   Q: <text>                    buffer a question
+ *   R: <answer>                  turn the buffered Q + this R into a QuizQuest
+ *   A: {opt, *correct, opt}      turn the buffered Q + this A into a MultipleChoiceQuest
+ *   L: <sentence {gap}>          a fill-in-the-blank sentence
+ *   BOSS                         subsequent Q/L/A go into the trail's boss
  *
  * Blank and unrecognised lines are ignored.
  */
@@ -67,6 +69,14 @@ export class CampaignParser implements CampaignTextParser {
         pendingQuestion = this.valueAfter(line, 'Q:');
       } else if (line.startsWith('R:')) {
         append(new QuizQuest(pendingQuestion ?? '', this.valueAfter(line, 'R:')));
+        pendingQuestion = null;
+      } else if (line.startsWith('A:') && pendingQuestion) {
+        const raw = this.valueAfter(line, 'A:').trim();
+        const inner = raw.replace(/^\{/, '').replace(/\}$/, '');
+        const tokens = inner.split(',').map((t) => t.trim());
+        const correctIndex = tokens.findIndex((t) => t.startsWith('*'));
+        const options = tokens.map((t) => (t.startsWith('*') ? t.slice(1).trim() : t));
+        append(new MultipleChoiceQuest(pendingQuestion, options, correctIndex));
         pendingQuestion = null;
       } else if (line.startsWith('L:')) {
         append(new FillInTheBlankQuest(this.valueAfter(line, 'L:')));

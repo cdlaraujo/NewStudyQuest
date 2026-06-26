@@ -8,7 +8,7 @@ ORDEM: 1
 Q: Which organelle stores the cell's genetic material?
 R: Nucleus
 Q: Which organelle is the powerhouse of the cell?
-R: Mitochondria
+A: {Cell wall, *Mitochondria, Ribosome, Nucleus}
 L: The {nucleus} stores DNA while ribosomes build {proteins}.
 BOSS
 Q: What surrounds and protects the whole cell?
@@ -19,10 +19,13 @@ TRILHA: DNA and Genetics
 ORDEM: 2
 Q: How many strands does a DNA double helix have?
 R: 2
+Q: Which molecule carries genetic information from DNA to ribosomes?
+A: {tRNA, rRNA, *mRNA, snRNA}
 L: DNA is made of repeating units called {nucleotides}.
 BOSS
 Q: Which base pairs with adenine in DNA?
-R: Thymine`;
+A: {Guanine, Cytosine, *Thymine, Uracil}
+L: The double helix was discovered by Watson and {Crick}.`;
 
 // ---- App state ----
 const state = {
@@ -112,6 +115,24 @@ async function onGenerate() {
   render();
 }
 
+// ---- Helpers ----
+function formatAnswer(a) {
+  return Array.isArray(a) ? a.join(', ') : (a ?? '');
+}
+
+// ---- Math rendering ----
+function renderMath(el) {
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(el, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+      ],
+      throwOnError: false,
+    });
+  }
+}
+
 // ---- Rendering ----
 function currentTrail() {
   if (!state.campaign) return null;
@@ -161,18 +182,35 @@ function questCard(q, trail, opts = {}) {
   if (done) card.classList.add('done');
 
   const isFill = q.type === 'fill-in-the-blank';
-  const inputs = isFill
-    ? Array.from({ length: q.gaps || 1 }, (_, i) => `<input data-gap="${i}" placeholder="Gap ${i + 1}" />`).join('')
-    : `<input placeholder="Your answer" />`;
+  const isMC = q.type === 'multiple-choice';
 
-  card.innerHTML = `
-    <div class="qtype">${isFill ? 'Fill in the blank' : 'Quiz'}</div>
-    <div class="prompt">${esc(q.prompt)}</div>
-    <div class="answer-row">
-      ${inputs}
-      <button class="btn primary">${done ? 'Answered ✓' : 'Submit'}</button>
-    </div>
-    <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Solved' : ''}</div>`;
+  if (isMC) {
+    card.innerHTML = `
+      <div class="qtype">Multiple choice</div>
+      <div class="prompt">${esc(q.prompt)}</div>
+      <div class="mc-options">
+        ${(q.options ?? []).map((opt, i) =>
+          `<label class="mc-label"><input type="radio" name="mc-${q.id}" value="${i}" ${done ? 'disabled' : ''} />${esc(opt)}</label>`
+        ).join('')}
+      </div>
+      <div class="answer-row" style="margin-top:10px">
+        <button class="btn primary">${done ? 'Answered ✓' : 'Submit'}</button>
+      </div>
+      <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Solved' : ''}</div>`;
+  } else {
+    const isFillInputs = isFill
+      ? Array.from({ length: q.gaps || 1 }, (_, i) => `<input data-gap="${i}" placeholder="Gap ${i + 1}" />`).join('')
+      : `<input placeholder="Your answer" />`;
+    const qtypeLabel = isFill ? 'Fill in the blank' : 'Quiz';
+    card.innerHTML = `
+      <div class="qtype">${qtypeLabel}</div>
+      <div class="prompt">${esc(q.prompt)}</div>
+      <div class="answer-row">
+        ${isFillInputs}
+        <button class="btn primary">${done ? 'Answered ✓' : 'Submit'}</button>
+      </div>
+      <div class="feedback ${done ? 'ok' : ''}">${done ? '✓ Solved' : ''}</div>`;
+  }
 
   const button = card.querySelector('button');
   const fields = Array.from(card.querySelectorAll('input'));
@@ -181,13 +219,15 @@ function questCard(q, trail, opts = {}) {
     button.disabled = true;
   }
 
-  const submit = () => handleAnswer({ q, isFill, fields, card, button, trail, boss: opts.boss });
+  const submit = () => handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss: opts.boss });
   button.addEventListener('click', submit);
-  fields.forEach((f) =>
-    f.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submit();
-    }),
-  );
+  if (!isMC) {
+    fields.forEach((f) =>
+      f.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submit();
+      }),
+    );
+  }
   return card;
 }
 
@@ -207,6 +247,7 @@ function renderCurrentQuest(trail) {
   progress.textContent = `Question ${idx + 1} of ${trail.quests.length}`;
   questsEl.appendChild(progress);
   questsEl.appendChild(questCard(trail.quests[idx], trail));
+  renderMath(questsEl);
 }
 
 function renderBoss(trail) {
@@ -224,15 +265,25 @@ function renderBoss(trail) {
     <div id="boss-card"></div>`;
   const card = questCard(q, trail, { boss: true });
   bossEl.querySelector('#boss-card').appendChild(card);
+  renderMath(bossEl);
 }
 
 // ---- Answering ----
-async function handleAnswer({ q, isFill, fields, card, button, trail, boss }) {
+async function handleAnswer({ q, isFill, isMC, fields, card, button, trail, boss }) {
   const feedback = card.querySelector('.feedback');
-  const answer = isFill ? fields.map((f) => f.value) : fields[0].value;
-  if (isFill ? answer.some((a) => a.trim() === '') : answer.trim() === '') {
+  const answer = isMC
+    ? (card.querySelector(`input[name="mc-${q.id}"]:checked`)?.value ?? '')
+    : isFill
+      ? fields.map((f) => f.value)
+      : fields[0].value;
+  const isEmpty = isMC
+    ? answer === ''
+    : isFill
+      ? answer.some((a) => a.trim() === '')
+      : answer.trim() === '';
+  if (isEmpty) {
     feedback.className = 'feedback bad';
-    feedback.textContent = 'Fill in every box first.';
+    feedback.textContent = isMC ? 'Pick an option first.' : 'Fill in every box first.';
     return;
   }
 
@@ -265,7 +316,7 @@ async function handleAnswer({ q, isFill, fields, card, button, trail, boss }) {
     }, 800);
   } else {
     feedback.className = 'feedback bad';
-    feedback.textContent = '✗ Not quite — added to your review queue.';
+    feedback.textContent = `✗ Not quite — answer: ${formatAnswer(data.correctAnswer)}. Added to review.`;
     setTimeout(() => {
       state.currentQuestIndex += 1;
       const trail = state.campaign.trails.find((t) => t.order === state.currentTrailOrder);
@@ -275,8 +326,12 @@ async function handleAnswer({ q, isFill, fields, card, button, trail, boss }) {
 }
 
 async function handleBossResult(data, trail, feedback) {
+  const activTrail = () =>
+    state.campaign?.trails.find((t) => t.order === state.currentTrailOrder) ?? trail;
+
   if (data.correct) {
-    const last = state.bossIndex >= trail.boss.length - 1;
+    const bossLength = activTrail().boss?.length ?? 0;
+    const last = state.bossIndex >= bossLength - 1;
     if (last) {
       toast('🐉 Boss defeated!  +50 XP', true);
       state.bossIndex = 0;
@@ -284,14 +339,17 @@ async function handleBossResult(data, trail, feedback) {
     } else {
       state.bossIndex += 1;
       toast('✓ Boss question cleared!');
-      renderBoss(trail);
+      renderBoss(activTrail());
     }
   } else {
     feedback.className = 'feedback bad';
-    feedback.textContent = '✗ Wrong — the boss resets! Start from question 1.';
+    feedback.textContent = `✗ Wrong — answer: ${formatAnswer(data.correctAnswer)}. Trail resets!`;
     setTimeout(() => {
+      const t = activTrail();
+      (t.quests ?? []).forEach((q) => state.completed.delete(q.id));
+      state.currentQuestIndex = 0;
       state.bossIndex = 0;
-      renderBoss(trail);
+      renderCurrentQuest(t);
     }, 1200);
   }
 }
@@ -324,6 +382,7 @@ async function onReview() {
   const trail = currentTrail();
   const card = questCard(data, trail);
   panel.querySelector('#review-card').appendChild(card);
+  renderMath(panel);
 }
 
 // ---- Wire up ----

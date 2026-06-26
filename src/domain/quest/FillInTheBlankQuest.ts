@@ -40,6 +40,10 @@ export class FillInTheBlankQuest extends Quest {
     return 15;
   }
 
+  getCorrectAnswer(): string[] {
+    return [...this.#expectedWords];
+  }
+
   toView(): QuestView {
     return {
       id: this.id,
