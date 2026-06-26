@@ -20,7 +20,7 @@ ORDEM: 2
 Q: Quantas fitas possui a dupla hélice de DNA?
 R: 2
 Q: Qual molécula transporta a informação genética do DNA para os ribossomos?
-R: {tRNA, rRNA, *mRNA, snRNA}
+A: {tRNA, rRNA, *mRNA, snRNA}
 L: O DNA é composto por unidades repetitivas chamadas {nucleotídeos}.
 BOSS
 Q: Qual base se pareia com a adenina no DNA?
