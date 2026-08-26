@@ -11,6 +11,10 @@
   <body>
     <header class="topbar">
       <div class="brand">⚔️ EduQuest</div>
+      <div class="player-id">
+        <label for="player-id-input" class="muted">Jogador</label>
+        <input id="player-id-input" placeholder="seu-id" />
+      </div>
       <div id="hud" class="hud" hidden>
         <span class="hud-item" title="Level">🏅 Lv <strong id="hud-level">1</strong></span>
         <span class="hud-item" title="Experience">
@@ -26,6 +30,12 @@
       <!-- Criar campanha -->
       <section id="create-panel" class="panel">
         <h1>Transforme suas anotações em uma quest</h1>
+
+        <div id="lobby" class="lobby" hidden>
+          <h2>Suas campanhas</h2>
+          <ul id="lobby-list" class="lobby-list"></ul>
+        </div>
+
         <p class="muted">
           Cole o material de estudo formatado pelo chatbot abaixo (veja
           <code>PROMPT.md</code>), ou carregue o exemplo, e gere sua campanha.

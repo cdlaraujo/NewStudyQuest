@@ -26,8 +26,23 @@ BOSS
 Q: Qual base se pareia com a adenina no DNA?
 R: {Guanina, Citosina, *Timina, Uracila}`;
 
+// ---- Identidade do jogador (sem autenticação: um id salvo no navegador) ----
+const PLAYER_ID_KEY = 'eduquest_player_id';
+function getPlayerId() {
+  let id = localStorage.getItem(PLAYER_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  }
+  return id;
+}
+function setPlayerId(id) {
+  localStorage.setItem(PLAYER_ID_KEY, id);
+}
+
 // ---- Estado da aplicação ----
 const state = {
+  playerId: getPlayerId(),
   campaignId: null,
   campaign: null,
   currentTrailOrder: null,
@@ -68,17 +83,24 @@ async function api(method, path, body) {
   return { status: res.status, data };
 }
 
-const generateCampaign = (text) => api('POST', '/campaigns/generate', { text });
+const generateCampaign = (text) =>
+  api('POST', `/players/${state.playerId}/campaigns/generate`, { text });
 const fetchCampaign = (id) => api('GET', `/campaigns/${id}`);
-const fetchPlayer = () => api('GET', '/player');
-const fetchReview = () => api('GET', '/player/review');
+const fetchPlayer = () => api('GET', `/players/${state.playerId}`);
+const fetchReview = () => api('GET', `/players/${state.playerId}/review`);
 const sendAnswer = (campaignId, questId, answer) =>
-  api('POST', `/campaigns/${campaignId}/quests/${questId}/answer`, { answer });
+  api(
+    'POST',
+    `/players/${state.playerId}/campaigns/${campaignId}/quests/${questId}/answer`,
+    { answer },
+  );
+const listCampaigns = () => api('GET', `/players/${state.playerId}/campaigns`);
+const deleteCampaign = (id) => api('DELETE', `/players/${state.playerId}/campaigns/${id}`);
 
 // ---- HUD (painel de status) ----
 async function refreshHud() {
-  const { data } = await fetchPlayer();
-  if (!data) return;
+  const { status, data } = await fetchPlayer();
+  if (status !== 200 || !data) return;
   $('hud').hidden = false;
   $('hud-level').textContent = data.level;
   $('hud-xp').textContent = data.xp;
@@ -86,6 +108,48 @@ async function refreshHud() {
   const pct = Math.min(100, Math.round((data.xp / (data.level * 100)) * 100));
   $('hud-xpbar').style.width = `${pct}%`;
   $('hud-bonus').hidden = !data.streakBonusActive;
+}
+
+// ---- Antesala (campanhas já geradas por este jogador) ----
+async function refreshLobby() {
+  const { status, data } = await listCampaigns();
+  const lobby = $('lobby');
+  const list = $('lobby-list');
+  if (status !== 200 || !data || data.length === 0) {
+    lobby.hidden = true;
+    list.innerHTML = '';
+    return;
+  }
+  lobby.hidden = false;
+  list.innerHTML = '';
+  data.forEach((c) => {
+    const li = document.createElement('li');
+    li.className = 'lobby-item';
+    li.innerHTML = `
+      <span class="lobby-name">${esc(c.name)}</span>
+      <span class="muted">${c.trailCount} trilha(s)</span>
+      <button class="btn ghost lobby-play">Continuar</button>
+      <button class="btn ghost lobby-delete">Excluir</button>`;
+    li.querySelector('.lobby-play').addEventListener('click', () => resumeCampaign(c.id));
+    li.querySelector('.lobby-delete').addEventListener('click', async () => {
+      await deleteCampaign(c.id);
+      await refreshLobby();
+    });
+    list.appendChild(li);
+  });
+}
+
+async function resumeCampaign(campaignId) {
+  const { status, data } = await fetchCampaign(campaignId);
+  if (status !== 200 || !data) return;
+  state.campaignId = data.id;
+  state.campaign = data;
+  state.completed = new Set();
+  state.bossIndex = 0;
+  $('create-panel').hidden = true;
+  $('play-panel').hidden = false;
+  await refreshHud();
+  render();
 }
 
 // ---- Fluxo de geração ----
@@ -112,6 +176,7 @@ async function onGenerate() {
   $('play-panel').hidden = false;
   await refreshHud();
   render();
+  await refreshLobby();
 }
 
 // ---- Auxiliares ----
@@ -394,4 +459,19 @@ window.addEventListener('DOMContentLoaded', () => {
   $('generate-btn').addEventListener('click', onGenerate);
   $('review-btn').addEventListener('click', onReview);
   $('restart-btn').addEventListener('click', () => location.reload());
+
+  const playerIdInput = $('player-id-input');
+  playerIdInput.value = state.playerId;
+  playerIdInput.addEventListener('change', () => {
+    const value = playerIdInput.value.trim();
+    if (!value) {
+      playerIdInput.value = state.playerId;
+      return;
+    }
+    setPlayerId(value);
+    location.reload();
+  });
+
+  refreshLobby();
+  refreshHud();
 });

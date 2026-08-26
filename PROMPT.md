@@ -1,6 +1,6 @@
 # Prompt para Chatbot Externo (geração de entrada)
 
-O backend do EduQuest nunca chama um LLM. Em vez disso, o estudante primeiro usa um chatbot comum (ChatGPT, Claude, Gemini, …) para converter o material de estudo bruto no formato de marcação abaixo, e então envia esse texto para `POST /api/campaigns/generate`.
+O backend do EduQuest nunca chama um LLM. Em vez disso, o estudante primeiro usa um chatbot comum (ChatGPT, Claude, Gemini, …) para converter o material de estudo bruto no formato de marcação abaixo, e então envia esse texto para `POST /api/players/{playerId}/campaigns/generate`.
 
 Copie o prompt abaixo em qualquer chatbot, cole seu material de estudo após ele e envie o texto simples gerado pelo chatbot para a API.
 

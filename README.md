@@ -11,27 +11,28 @@ Arquitetura limpa / hexagonal — as dependências apontam para dentro; o domín
 ```
 src/
 ├── domain/                     # regras de negócio puras, sem imports de framework
-│   ├── quest/                  # Quest (abstrato) + QuizQuest, FillInTheBlankQuest, MultipleChoiceQuest, QuestResult
+│   ├── quest/                  # Quest (base) + QuizQuest, FillInTheBlankQuest, MultipleChoiceQuest, QuestResult
 │   ├── boss/                   # BossContainer (composição, não é uma Quest)
 │   ├── trail/                  # Trilha + máquina de estados TrailState
 │   ├── campaign/               # Campanha (desbloqueio sequencial)
-│   ├── player/                 # Player, LevelResult, XpModifier, StreakBonus
-│   ├── review/                 # ReviewQueue + WeightStrategy / WeightedRandom / TimeDecay
+│   ├── player/                 # Player, LevelResult, StreakBonus
+│   ├── review/                 # ReviewQueue + WeightedRandomStrategy
 │   └── shared/                 # normalize()
-├── application/                # casos de uso + ports (interfaces)
-│   ├── ports/                  # CampaignRepository, PlayerRepository
-│   └── usecases/               # GenerateCampaign, AnswerQuest, GetNextReview, GetPlayer, GetCampaign
+├── application/                # casos de uso
+│   └── usecases/               # GenerateCampaign, AnswerQuest, GetNextReview, GetPlayer, GetCampaign, ListCampaigns, DeleteCampaign
 ├── infrastructure/             # adaptadores: como o mundo externo se conecta
 │   ├── parser/                 # CampaignParser (texto → domínio)
-│   ├── persistence/            # repositórios em memória
+│   ├── persistence/            # repositórios JSON (um arquivo por jogador/campanha)
 │   └── web/                    # servidor Express, rotas, presenters (+ UI estática)
-└── main.ts                     # composition root (conecta tudo)
+└── main.js                     # composition root (conecta tudo)
 
 public/                         # UI do navegador (HTML/CSS/JS puro, sem etapa de build)
 ├── index.html
 ├── styles.css
 └── app.js
 ```
+
+Sem TypeScript e sem etapa de build: `src/` é JavaScript puro (ESM nativo do Node), executado diretamente. Os "ports" (`CampaignRepository`, `PlayerRepository`, `WeightStrategy`, `XpModifier`) existiam como interfaces TypeScript; hoje são apenas o contrato implícito que `JsonCampaignRepository`/`JsonPlayerRepository`/`WeightedRandomStrategy`/`StreakBonus` seguem.
 
 ### Padrões de design em destaque
 
@@ -40,10 +41,10 @@ public/                         # UI do navegador (HTML/CSS/JS puro, sem etapa d
 | **Template Method / Polimorfismo** | `Quest.complete()` chama `validate()` / `getXpReward()` da subclasse; nenhuma verificação de tipo em nenhum lugar |
 | **Composição sobre herança** | `BossContainer` *contém* quests, **não é** uma `Quest` |
 | **Máquina de estados** | `Trilha` LOCKED → UNLOCKED → COMPLETED |
-| **Strategy** | `WeightStrategy` (`WeightedRandomStrategy`, `TimeDecayWeightStrategy`) |
-| **Comportamentos compostos** | `Player.addXp(base, modifiers)` aplica `XpModifier`s em sequência (ex.: `StreakBonus`) |
-| **Ports & Adapters** | casos de uso dependem de *interfaces* de repositório; adaptadores em memória as implementam |
-| **Injeção de dependência** | tudo é conectado em `main.ts`; relógios/RNG são injetáveis para testes |
+| **Strategy** | seleção da fila de revisão delegada a uma strategy injetada (`WeightedRandomStrategy`) |
+| **Comportamentos compostos** | `Player.addXp(base, modifiers)` aplica modificadores de XP em sequência (ex.: `StreakBonus`) |
+| **Ports & Adapters** | casos de uso dependem apenas do formato esperado de um repositório; `JsonCampaignRepository`/`JsonPlayerRepository` o implementam |
+| **Injeção de dependência** | tudo é conectado em `main.js`; relógios/RNG são injetáveis para testes |
 
 O encapsulamento é aplicado em tempo de execução: `#xp`, `#level` e `#streak` do `Player` são campos verdadeiramente privados e só podem mudar por `addXp` / `incrementStreak`.
 
@@ -51,10 +52,9 @@ O encapsulamento é aplicado em tempo de execução: `#xp`, `#level` e `#streak`
 
 ```bash
 npm install
-npm test          # executa a suíte Jest (52 testes, todas as camadas)
-npm run dev       # inicia o servidor com ts-node (http://localhost:3000)
-npm run build     # compila para dist/
-npm start         # executa o servidor compilado
+npm test          # executa a suíte Jest
+npm run dev       # inicia o servidor com --watch (http://localhost:3000)
+npm start         # inicia o servidor (sem watch)
 ```
 
 Defina a variável `PORT` para alterar a porta (padrão `3000`).
@@ -65,20 +65,28 @@ Com o servidor em execução, abra **http://localhost:3000/** — uma pequena UI
 
 ## API
 
-Todos os dados ficam em memória; não há autenticação nem banco de dados, e um único jogador, `player-1`, é compartilhado por todos. O servidor também serve a UI do navegador em `/` e os arquivos estáticos de [public/](public/).
+Os dados persistem em JSON sob `data/`; não há autenticação — qualquer `playerId` que o cliente escolher identifica um jogador (a UI gera um id aleatório e guarda no navegador). Cada jogador tem seu próprio XP/nível/streak, fila de revisão e lista de campanhas. O servidor também serve a UI do navegador em `/` e os arquivos estáticos de [public/](public/).
 
-### `POST /api/campaigns/generate`
+### `POST /api/players/:playerId/campaigns/generate`
 
 Body: `{ "text": "<marcação formatada pelo chatbot>" }`
-Retorna `201` com o `id` e a estrutura completa da campanha (respostas não são incluídas).
+Gera uma campanha, associa-a ao `playerId` como dono, e retorna `201` com o `id` e a estrutura completa (respostas não são incluídas).
 
 ```bash
-curl -X POST http://localhost:3000/api/campaigns/generate \
+curl -X POST http://localhost:3000/api/players/alice/campaigns/generate \
   -H 'Content-Type: application/json' \
   -d "{\"text\": \"CAMPANHA: Demo\nTRILHA: Intro\nORDEM: 1\nQ: 2 + 2?\nR: 4\"}"
 ```
 
-### `POST /api/campaigns/:campaignId/quests/:questId/answer`
+### `GET /api/players/:playerId/campaigns`
+
+Antesala: lista as campanhas já geradas por esse jogador (`id`, `name`, `trailCount`), sem a estrutura completa de trilhas/quests.
+
+### `DELETE /api/players/:playerId/campaigns/:campaignId`
+
+Remove uma campanha, mas apenas se pertencer a `playerId`. Retorna `204`, ou `404` se a campanha não existir ou pertencer a outro jogador.
+
+### `POST /api/players/:playerId/campaigns/:campaignId/quests/:questId/answer`
 
 Body: `{ "answer": "4" }` para quiz, ou `{ "answer": ["a", "b"] }` para preencher lacunas. Retorna se acertou mais o estado atualizado do jogador:
 
@@ -86,16 +94,16 @@ Body: `{ "answer": "4" }` para quiz, ou `{ "answer": ["a", "b"] }` para preenche
 { "correct": true, "xpGained": 10, "newLevel": 1, "leveledUp": false, "streak": 1 }
 ```
 
-### `GET /api/player/review`
+### `GET /api/players/:playerId/review`
 
-Retorna a próxima quest da fila de revisão (escolhida pelo peso dinâmico), ou `204 No Content` quando a fila está vazia.
+Retorna a próxima quest da fila de revisão desse jogador (escolhida pelo peso dinâmico), ou `204 No Content` quando a fila está vazia.
 
-### `GET /api/player`
+### `GET /api/players/:playerId`
 
 Retorna o estado atual do jogador para o HUD:
 
 ```json
-{ "id": "player-1", "level": 1, "xp": 0, "streak": 0, "streakBonusActive": false }
+{ "id": "alice", "level": 1, "xp": 0, "streak": 0, "streakBonusActive": false }
 ```
 
 ### `GET /api/campaigns/:campaignId`

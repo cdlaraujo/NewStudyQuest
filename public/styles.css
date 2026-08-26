@@ -40,6 +40,17 @@ body {
 
 .brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px; }
 
+.player-id { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.player-id input {
+  width: 120px;
+  background: var(--bg-soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 0.85rem;
+}
+
 .hud { display: flex; align-items: center; gap: 18px; font-size: 0.95rem; }
 .hud-item { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
 .hud-item strong { color: var(--ink); }
@@ -117,6 +128,21 @@ textarea {
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .error { color: var(--danger); font-weight: 600; }
+
+/* lobby */
+.lobby { margin-bottom: 20px; }
+.lobby h2 { margin: 0 0 10px; }
+.lobby-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lobby-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.lobby-name { font-weight: 700; flex: 1; }
 
 /* play */
 .play-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 6px; }

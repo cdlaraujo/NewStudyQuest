@@ -2,13 +2,13 @@
   "name": "eduquest",
   "version": "1.0.0",
   "description": "EduQuest - a gamified study backend that turns chatbot-formatted study material into RPG-style campaigns. Clean architecture (domain / application / infrastructure).",
-  "main": "dist/main.js",
+  "type": "module",
+  "main": "src/main.js",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "start": "node src/main.js",
+    "dev": "node --watch src/main.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch"
   },
   "keywords": [
     "education",
@@ -23,12 +23,6 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.15.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.3.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.0"
+    "jest": "^29.7.0"
   }
 }
