@@ -40,16 +40,6 @@ body {
 
 .brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px; }
 
-.player-id { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-.player-id input {
-  width: 120px;
-  background: var(--bg-soft);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 5px 9px;
-  font-size: 0.85rem;
-}
 
 .hud { display: flex; align-items: center; gap: 18px; font-size: 0.95rem; }
 .hud-item { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
@@ -127,7 +117,15 @@ textarea {
 .btn.ghost { background: transparent; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.error { color: var(--danger); font-weight: 600; }
+.error {
+  color: var(--danger);
+  font-weight: 600;
+  background: rgba(255, 93, 108, 0.08);
+  border: 1px solid rgba(255, 93, 108, 0.45);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
 
 /* lobby */
 .lobby { margin-bottom: 20px; }

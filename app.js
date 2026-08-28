@@ -1,55 +1,140 @@
-'use strict';
+import { JsonCampaignParser } from './src/infrastructure/parser/JsonCampaignParser.js';
+import { LocalStorageCampaignRepository } from './src/infrastructure/persistence/LocalStorageCampaignRepository.js';
+import { LocalStoragePlayerRepository } from './src/infrastructure/persistence/LocalStoragePlayerRepository.js';
+import { StreakBonus } from './src/domain/player/StreakBonus.js';
+import { ReviewQueue } from './src/domain/review/ReviewQueue.js';
+import { WeightedRandomStrategy } from './src/domain/review/WeightedRandomStrategy.js';
+import { GenerateCampaign } from './src/application/usecases/GenerateCampaign.js';
+import { AnswerQuest } from './src/application/usecases/AnswerQuest.js';
+import { GetNextReview } from './src/application/usecases/GetNextReview.js';
+import { GetPlayer } from './src/application/usecases/GetPlayer.js';
+import { GetCampaign } from './src/application/usecases/GetCampaign.js';
+import { ListCampaigns } from './src/application/usecases/ListCampaigns.js';
+import { DeleteCampaign } from './src/application/usecases/DeleteCampaign.js';
+import {
+  campaignToDto,
+  campaignSummaryToDto,
+  questToDto,
+  playerToDto,
+} from './src/infrastructure/browser/presenters.js';
 
-// ---- Campanha de exemplo (corresponde a examples/sample-campaign.txt) ----
-const SAMPLE = `CAMPANHA: Noções Básicas de Biologia Celular
+// ---- Campanha de exemplo (Campaign JSON v1) ----
+const SAMPLE = `{
+  "version": 1,
+  "name": "Noções Básicas de Biologia Celular",
+  "trails": [
+    {
+      "name": "A Célula",
+      "order": 1,
+      "quests": [
+        {
+          "type": "quiz",
+          "prompt": "Qual organela armazena o material genético da célula?",
+          "answer": "Núcleo"
+        },
+        {
+          "type": "multiple-choice",
+          "prompt": "Qual organela é a central de energia da célula?",
+          "options": [
+            { "text": "Parede celular", "correct": false },
+            { "text": "Mitocôndria", "correct": true },
+            { "text": "Ribossomo", "correct": false },
+            { "text": "Núcleo", "correct": false }
+          ]
+        },
+        {
+          "type": "fill-in-the-blank",
+          "prompt": "O _____ armazena o DNA, enquanto os ribossomos produzem _____.",
+          "answers": ["núcleo", "proteínas"]
+        }
+      ],
+      "boss": [
+        {
+          "type": "quiz",
+          "prompt": "O que envolve e protege toda a célula?",
+          "answer": "Membrana celular"
+        },
+        {
+          "type": "fill-in-the-blank",
+          "prompt": "As células vegetais possuem, adicionalmente, uma _____ rígida.",
+          "answers": ["parede celular"]
+        }
+      ]
+    },
+    {
+      "name": "DNA e Genética",
+      "order": 2,
+      "quests": [
+        {
+          "type": "quiz",
+          "prompt": "Quantas fitas possui a dupla hélice de DNA?",
+          "answer": "2"
+        },
+        {
+          "type": "multiple-choice",
+          "prompt": "Qual molécula transporta a informação genética do DNA para os ribossomos?",
+          "options": [
+            { "text": "tRNA", "correct": false },
+            { "text": "rRNA", "correct": false },
+            { "text": "mRNA", "correct": true },
+            { "text": "snRNA", "correct": false }
+          ]
+        },
+        {
+          "type": "fill-in-the-blank",
+          "prompt": "O DNA é composto por unidades repetitivas chamadas _____.",
+          "answers": ["nucleotídeos"]
+        }
+      ],
+      "boss": [
+        {
+          "type": "multiple-choice",
+          "prompt": "Qual base se pareia com a adenina no DNA?",
+          "options": [
+            { "text": "Guanina", "correct": false },
+            { "text": "Citosina", "correct": false },
+            { "text": "Timina", "correct": true },
+            { "text": "Uracila", "correct": false }
+          ]
+        }
+      ]
+    }
+  ]
+}`;
 
-TRILHA: A Célula
-ORDEM: 1
-Q: Qual organela armazena o material genético da célula?
-R: Núcleo
-Q: Qual organela é a central de energia da célula?
-A: {Parede celular, *Mitocôndria, Ribossomo, Núcleo}
-L: O {núcleo} armazena o DNA, enquanto os ribossomos produzem {proteínas}.
-BOSS
-Q: O que envolve e protege toda a célula?
-R: Membrana celular
-L: As células vegetais possuem, adicionalmente, uma {parede celular} rígida.
+// ---- Composition root local: domínio + localStorage, sem API/servidor ----
+const campaignRepo = new LocalStorageCampaignRepository();
+const playerRepo = new LocalStoragePlayerRepository();
+const reviewQueue = new ReviewQueue(new WeightedRandomStrategy());
+const parser = new JsonCampaignParser();
 
-TRILHA: DNA e Genética
-ORDEM: 2
-Q: Quantas fitas possui a dupla hélice de DNA?
-R: 2
-Q: Qual molécula transporta a informação genética do DNA para os ribossomos?
-A: {tRNA, rRNA, *mRNA, snRNA}
-L: O DNA é composto por unidades repetitivas chamadas {nucleotídeos}.
-BOSS
-Q: Qual base se pareia com a adenina no DNA?
-R: {Guanina, Citosina, *Timina, Uracila}`;
-
-// ---- Identidade do jogador (sem autenticação: um id salvo no navegador) ----
-const PLAYER_ID_KEY = 'eduquest_player_id';
-function getPlayerId() {
-  let id = localStorage.getItem(PLAYER_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(PLAYER_ID_KEY, id);
-  }
-  return id;
-}
-function setPlayerId(id) {
-  localStorage.setItem(PLAYER_ID_KEY, id);
-}
+const useCases = {
+  generateCampaign: new GenerateCampaign(parser, campaignRepo),
+  answerQuest: new AnswerQuest(campaignRepo, playerRepo, reviewQueue, [new StreakBonus()]),
+  getNextReview: new GetNextReview(reviewQueue),
+  getPlayer: new GetPlayer(playerRepo),
+  getCampaign: new GetCampaign(campaignRepo),
+  listCampaigns: new ListCampaigns(campaignRepo),
+  deleteCampaign: new DeleteCampaign(campaignRepo),
+};
 
 // ---- Estado da aplicação ----
 const state = {
-  playerId: getPlayerId(),
   campaignId: null,
   campaign: null,
   currentTrailOrder: null,
   currentQuestIndex: 0,
   bossIndex: 0,
-  completed: new Set(), // ids das quests respondidas corretamente nesta sessão
+  completed: new Set(),
 };
+
+function completedQuestIds(campaign) {
+  return new Set(
+    (campaign?.trails ?? []).flatMap((trail) =>
+      (trail.quests ?? []).filter((quest) => quest.completed).map((quest) => quest.id),
+    ),
+  );
+}
 
 // ---- Utilitários DOM ----
 const $ = (id) => document.getElementById(id);
@@ -72,30 +157,55 @@ function toast(msg, levelup = false) {
   }, 2200);
 }
 
-// ---- API ----
-async function api(method, path, body) {
-  const res = await fetch(`/api${path}`, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = res.status === 204 ? null : await res.json().catch(() => null);
-  return { status: res.status, data };
+// Mantém a antiga forma { status, data } para não reescrever a UI inteira.
+async function generateCampaign(text) {
+  try {
+    return { status: 201, data: campaignToDto(useCases.generateCampaign.execute(text)) };
+  } catch (error) {
+    return { status: 400, data: { error: error.message } };
+  }
 }
 
-const generateCampaign = (text) =>
-  api('POST', `/players/${state.playerId}/campaigns/generate`, { text });
-const fetchCampaign = (id) => api('GET', `/campaigns/${id}`);
-const fetchPlayer = () => api('GET', `/players/${state.playerId}`);
-const fetchReview = () => api('GET', `/players/${state.playerId}/review`);
-const sendAnswer = (campaignId, questId, answer) =>
-  api(
-    'POST',
-    `/players/${state.playerId}/campaigns/${campaignId}/quests/${questId}/answer`,
-    { answer },
-  );
-const listCampaigns = () => api('GET', `/players/${state.playerId}/campaigns`);
-const deleteCampaign = (id) => api('DELETE', `/players/${state.playerId}/campaigns/${id}`);
+async function fetchCampaign(id) {
+  try {
+    return { status: 200, data: campaignToDto(useCases.getCampaign.execute(id)) };
+  } catch (error) {
+    return { status: 404, data: { error: error.message } };
+  }
+}
+
+async function fetchPlayer() {
+  return { status: 200, data: playerToDto(useCases.getPlayer.execute()) };
+}
+
+async function fetchReview() {
+  const quest = useCases.getNextReview.execute();
+  return quest ? { status: 200, data: questToDto(quest) } : { status: 204, data: null };
+}
+
+async function sendAnswer(campaignId, questId, answer) {
+  try {
+    return { status: 200, data: useCases.answerQuest.execute(campaignId, questId, answer) };
+  } catch (error) {
+    return { status: 404, data: { error: error.message } };
+  }
+}
+
+async function listCampaigns() {
+  return {
+    status: 200,
+    data: useCases.listCampaigns.execute().map(campaignSummaryToDto),
+  };
+}
+
+async function deleteCampaign(id) {
+  try {
+    useCases.deleteCampaign.execute(id);
+    return { status: 204, data: null };
+  } catch (error) {
+    return { status: 404, data: { error: error.message } };
+  }
+}
 
 // ---- HUD (painel de status) ----
 async function refreshHud() {
@@ -144,8 +254,9 @@ async function resumeCampaign(campaignId) {
   if (status !== 200 || !data) return;
   state.campaignId = data.id;
   state.campaign = data;
-  state.completed = new Set();
-  state.bossIndex = 0;
+  state.completed = completedQuestIds(data);
+  const unlocked = data.trails.find((trail) => trail.state === 'UNLOCKED');
+  state.bossIndex = unlocked?.bossCurrent ?? 0;
   $('create-panel').hidden = true;
   $('play-panel').hidden = false;
   await refreshHud();
@@ -153,25 +264,33 @@ async function resumeCampaign(campaignId) {
 }
 
 // ---- Fluxo de geração ----
+function showCreateError(message) {
+  const errEl = $('create-error');
+  errEl.textContent = message;
+  errEl.hidden = false;
+  toast('Não foi possível importar a campanha.');
+  errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  $('source').focus();
+}
+
 async function onGenerate() {
   const text = $('source').value.trim();
   const errEl = $('create-error');
   errEl.hidden = true;
   if (!text) {
-    errEl.textContent = 'Cole o texto da campanha primeiro (ou carregue o exemplo).';
-    errEl.hidden = false;
+    showCreateError('Cole o JSON da campanha primeiro (ou carregue o exemplo).');
     return;
   }
   const { status, data } = await generateCampaign(text);
   if (status !== 201 || !data) {
-    errEl.textContent = (data && data.error) || 'Não foi possível gerar a campanha.';
-    errEl.hidden = false;
+    showCreateError((data && data.error) || 'Não foi possível gerar a campanha.');
     return;
   }
   state.campaignId = data.id;
   state.campaign = data;
-  state.completed = new Set();
-  state.bossIndex = 0;
+  state.completed = completedQuestIds(data);
+  const unlocked = data.trails.find((trail) => trail.state === 'UNLOCKED');
+  state.bossIndex = unlocked?.bossCurrent ?? 0;
   $('create-panel').hidden = true;
   $('play-panel').hidden = false;
   await refreshHud();
@@ -221,7 +340,7 @@ function render() {
 
   state.currentTrailOrder = trail.order;
   state.currentQuestIndex = 0;
-  state.bossIndex = 0;
+  state.bossIndex = trail.bossCurrent ?? 0;
   $('trail-done').hidden = true;
   $('trail-title').textContent = `Trilha ${trail.order}: ${trail.name}`;
 
@@ -319,7 +438,7 @@ function renderBoss(trail) {
   const bossEl = $('boss');
   if (!trail.boss || trail.boss.length === 0) {
     bossEl.hidden = true;
-    maybeAdvanceTrail(); // trail may already be complete on the server
+    maybeAdvanceTrail(); // trail may already be complete
     return;
   }
   bossEl.hidden = false;
@@ -407,13 +526,11 @@ async function handleBossResult(data, trail, feedback) {
     }
   } else {
     feedback.className = 'feedback bad';
-    feedback.textContent = `✗ Errado — resposta: ${formatAnswer(data.correctAnswer)}. A trilha reinicia!`;
+    feedback.textContent = `✗ Errado — resposta: ${formatAnswer(data.correctAnswer)}. O boss reinicia!`;
     setTimeout(() => {
       const t = activTrail();
-      (t.quests ?? []).forEach((q) => state.completed.delete(q.id));
-      state.currentQuestIndex = 0;
       state.bossIndex = 0;
-      renderCurrentQuest(t);
+      renderBoss(t);
     }, 1200);
   }
 }
@@ -460,17 +577,6 @@ window.addEventListener('DOMContentLoaded', () => {
   $('review-btn').addEventListener('click', onReview);
   $('restart-btn').addEventListener('click', () => location.reload());
 
-  const playerIdInput = $('player-id-input');
-  playerIdInput.value = state.playerId;
-  playerIdInput.addEventListener('change', () => {
-    const value = playerIdInput.value.trim();
-    if (!value) {
-      playerIdInput.value = state.playerId;
-      return;
-    }
-    setPlayerId(value);
-    location.reload();
-  });
 
   refreshLobby();
   refreshHud();

@@ -1,38 +1,81 @@
-# Prompt para Chatbot Externo (geração de entrada)
+# Prompt para Chatbot Externo
 
-O backend do EduQuest nunca chama um LLM. Em vez disso, o estudante primeiro usa um chatbot comum (ChatGPT, Claude, Gemini, …) para converter o material de estudo bruto no formato de marcação abaixo, e então envia esse texto para `POST /api/players/{playerId}/campaigns/generate`.
+O EduQuest não chama um LLM. O estudante usa ChatGPT, Claude, Gemini ou outro chatbot para transformar suas anotações em **Campaign JSON v1**, e cola o resultado diretamente no aplicativo.
 
-Copie o prompt abaixo em qualquer chatbot, cole seu material de estudo após ele e envie o texto simples gerado pelo chatbot para a API.
+Copie o texto abaixo para o chatbot e acrescente seu material de estudo.
 
 ---
 
-Você é um formatador de material de estudo. Converta o material de estudo que eu fornecer em uma "campanha" em texto simples usando APENAS os seguintes prefixos de linha. Produza somente o texto formatado — sem explicações, sem Markdown, sem blocos de código.
+Você é um formatador de material de estudo para o EduQuest.
+
+Converta o material fornecido em **um único objeto JSON válido**, sem Markdown, sem bloco de código e sem qualquer explicação antes ou depois.
+
+Use exatamente este formato geral:
+
+```json
+{
+  "version": 1,
+  "name": "Nome da campanha",
+  "trails": [
+    {
+      "name": "Nome da trilha",
+      "order": 1,
+      "quests": [],
+      "boss": []
+    }
+  ]
+}
+```
+
+Tipos de questão permitidos:
+
+**Resposta curta**
+
+```json
+{
+  "type": "quiz",
+  "prompt": "Pergunta",
+  "answer": "Resposta curta"
+}
+```
+
+**Múltipla escolha** — use 3 ou 4 alternativas e marque exatamente uma como correta.
+
+```json
+{
+  "type": "multiple-choice",
+  "prompt": "Pergunta",
+  "options": [
+    { "text": "Alternativa A", "correct": false },
+    { "text": "Alternativa B", "correct": true },
+    { "text": "Alternativa C", "correct": false }
+  ]
+}
+```
+
+**Preencher lacunas** — represente cada lacuna por exatamente cinco underscores (`_____`) e forneça as respostas na mesma ordem.
+
+```json
+{
+  "type": "fill-in-the-blank",
+  "prompt": "O _____ contém o material genético.",
+  "answers": ["núcleo"]
+}
+```
 
 Regras:
 
-- `CAMPANHA:` — o título principal (use exatamente uma vez, na primeira linha).
-- `TRILHA:` — o nome de cada subtópico (uma "trilha"). Use vários.
-- `ORDEM:` — um número que indica a posição da trilha, escrito na linha logo após seu `TRILHA:`. Numere as trilhas 1, 2, 3, …
-- `Q:` — uma pergunta. Deve ser seguida imediatamente por `R:` ou `A:`.
-- `R:` — a resposta curta em texto livre para o `Q:` imediatamente acima.
-- `A:` — opções de múltipla escolha para o `Q:` imediatamente acima. Escreva todas as opções em uma linha dentro de chaves, separadas por vírgulas. Marque a opção correta com o prefixo `*`: `A: {Errada, *Correta, Também errada}`
-- `L:` — uma frase para preencher lacunas. Coloque cada palavra ausente em `{chaves}`. Uma frase pode conter mais de uma lacuna.
-- `BOSS` — em sua própria linha, perto do final de uma trilha. Cada linha `Q:`/`R:`/`A:`/`L:` após ela (até o próximo `TRILHA:`) pertence ao desafio boss dessa trilha.
-
-Notação matemática:
-
-- Fórmulas inline entre `$…$`: ex. `Q: Qual é $E = mc^2$?`
-- Fórmulas em bloco (display) entre `$$…$$`.
-- Use notação LaTeX padrão dentro dos delimitadores.
-
-Diretrizes:
-
-- Agrupe perguntas relacionadas sob o mesmo `TRILHA:`.
-- Coloque 3–6 perguntas normais antes do `BOSS` de cada trilha. Misture os tipos de perguntas: use `R:` para respostas curtas em texto livre, `A:` para múltipla escolha e `L:` para preencher lacunas.
-- Faça as perguntas do boss um pouco mais difíceis — elas resumem a trilha.
-- Mantenha as respostas de `R:` curtas e sem ambiguidade (uma única palavra ou frase curta).
-- Para perguntas `A:`, inclua 3–4 opções plausíveis e marque exatamente uma com `*`.
-- Produza apenas texto simples.
+- `version` deve ser `1`.
+- Crie várias trilhas relacionadas ao material e numere `order` como 1, 2, 3, ... sem repetir números.
+- Cada trilha deve ter pelo menos uma questão normal.
+- Coloque 3–6 questões normais por trilha quando houver material suficiente.
+- Misture os três tipos de questão.
+- `boss` é um array de questões um pouco mais difíceis que resumem a trilha; pode ficar vazio se necessário.
+- Em `multiple-choice`, deve existir exatamente uma opção com `"correct": true`.
+- Em `fill-in-the-blank`, a quantidade de `_____` no `prompt` deve ser igual à quantidade de itens em `answers`.
+- Respostas curtas devem ser pouco ambíguas.
+- Fórmulas matemáticas podem usar LaTeX entre `$...$` ou `$$...$$`. Como a saída é JSON, escape barras invertidas quando necessário (por exemplo `\\frac{a}{b}`).
+- Produza somente JSON válido.
 
 Material de estudo:
 
@@ -40,4 +83,4 @@ Material de estudo:
 
 ---
 
-Veja [examples/sample-campaign.txt](examples/sample-campaign.txt) para um exemplo completo do resultado esperado.
+Veja [examples/sample-campaign.json](examples/sample-campaign.json) para um exemplo completo.

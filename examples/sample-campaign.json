@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "name": "Noções Básicas de Biologia Celular",
+  "trails": [
+    {
+      "name": "A Célula",
+      "order": 1,
+      "quests": [
+        {
+          "type": "quiz",
+          "prompt": "Qual organela armazena o material genético da célula?",
+          "answer": "Núcleo"
+        },
+        {
+          "type": "multiple-choice",
+          "prompt": "Qual organela é a central de energia da célula?",
+          "options": [
+            { "text": "Parede celular", "correct": false },
+            { "text": "Mitocôndria", "correct": true },
+            { "text": "Ribossomo", "correct": false },
+            { "text": "Núcleo", "correct": false }
+          ]
+        },
+        {
+          "type": "fill-in-the-blank",
+          "prompt": "O _____ armazena o DNA, enquanto os ribossomos produzem _____.",
+          "answers": ["núcleo", "proteínas"]
+        }
+      ],
+      "boss": [
+        {
+          "type": "quiz",
+          "prompt": "O que envolve e protege toda a célula?",
+          "answer": "Membrana celular"
+        }
+      ]
+    },
+    {
+      "name": "DNA e Genética",
+      "order": 2,
+      "quests": [
+        {
+          "type": "quiz",
+          "prompt": "Quantas fitas possui a dupla hélice de DNA?",
+          "answer": "2"
+        },
+        {
+          "type": "multiple-choice",
+          "prompt": "Qual molécula transporta a informação genética do DNA para os ribossomos?",
+          "options": [
+            { "text": "tRNA", "correct": false },
+            { "text": "rRNA", "correct": false },
+            { "text": "mRNA", "correct": true },
+            { "text": "snRNA", "correct": false }
+          ]
+        },
+        {
+          "type": "fill-in-the-blank",
+          "prompt": "O DNA é composto por unidades repetitivas chamadas _____.",
+          "answers": ["nucleotídeos"]
+        }
+      ],
+      "boss": [
+        {
+          "type": "multiple-choice",
+          "prompt": "Qual base se pareia com a adenina no DNA?",
+          "options": [
+            { "text": "Guanina", "correct": false },
+            { "text": "Citosina", "correct": false },
+            { "text": "Timina", "correct": true },
+            { "text": "Uracila", "correct": false }
+          ]
+        }
+      ]
+    }
+  ]
+}

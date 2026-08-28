@@ -1,13 +1,16 @@
-/** Retorna o jogador atual para que a UI possa exibir o HUD de XP/nível/streak em tempo real. */
+import { Player } from '../../domain/player/Player.js';
+
+/** Retorna o único jogador local, criando-o na primeira execução. */
 export class GetPlayer {
   constructor(players) {
     this.players = players;
   }
 
-  execute(playerId) {
-    const player = this.players.findById(playerId);
+  execute() {
+    let player = this.players.get();
     if (!player) {
-      throw new Error(`Player ${playerId} not found`);
+      player = new Player('local-player');
+      this.players.save(player);
     }
     return player;
   }

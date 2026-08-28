@@ -1,28 +1,17 @@
 {
   "name": "eduquest",
-  "version": "1.0.0",
-  "description": "EduQuest - a gamified study backend that turns chatbot-formatted study material into RPG-style campaigns. Clean architecture (domain / application / infrastructure).",
+  "version": "2.0.0",
+  "description": "Standalone gamified study app that imports AI-generated Campaign JSON.",
   "type": "module",
-  "main": "src/main.js",
   "scripts": {
-    "start": "node src/main.js",
-    "dev": "node --watch src/main.js",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest",
-    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch"
+    "start": "node tools/serve.js",
+    "test": "node --test"
   },
   "keywords": [
     "education",
     "gamification",
-    "clean-architecture",
-    "ddd",
-    "design-patterns"
+    "standalone",
+    "localstorage"
   ],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.21.2"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
-  }
+  "license": "MIT"
 }

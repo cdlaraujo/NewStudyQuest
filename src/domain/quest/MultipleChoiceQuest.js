@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
+import { createId } from '../shared/createId.js';
 import { Quest } from './Quest.js';
 
 export class MultipleChoiceQuest extends Quest {
   #options;
   #correctIndex;
 
-  constructor(question, options, correctIndex, id = randomUUID()) {
+  constructor(question, options, correctIndex, id = createId()) {
     super(id, question);
     this.#options = options;
     this.#correctIndex = correctIndex;
@@ -29,6 +29,7 @@ export class MultipleChoiceQuest extends Quest {
       type: 'multiple-choice',
       prompt: this.question,
       options: this.#options,
+      completed: this.isCompleted(),
     };
   }
 

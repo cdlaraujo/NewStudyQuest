@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createId } from '../shared/createId.js';
 import { Quest } from './Quest.js';
 import { normalize } from '../shared/normalize.js';
 
@@ -10,7 +10,7 @@ import { normalize } from '../shared/normalize.js';
 export class QuizQuest extends Quest {
   #answer;
 
-  constructor(question, answer, id = randomUUID()) {
+  constructor(question, answer, id = createId()) {
     super(id, question);
     this.#answer = answer;
   }
@@ -31,7 +31,7 @@ export class QuizQuest extends Quest {
   }
 
   toView() {
-    return { id: this.id, type: 'quiz', prompt: this.question };
+    return { id: this.id, type: 'quiz', prompt: this.question, completed: this.isCompleted() };
   }
 
   toJSON() {

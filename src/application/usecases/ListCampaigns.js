@@ -1,10 +1,10 @@
-/** Lista as campanhas de um jogador para a antesala (tela de "campanhas anteriores"). */
+/** Lista as campanhas salvas neste dispositivo. */
 export class ListCampaigns {
   constructor(campaigns) {
     this.campaigns = campaigns;
   }
 
-  execute(ownerId) {
-    return this.campaigns.findAllByOwner(ownerId);
+  execute() {
+    return this.campaigns.findAll();
   }
 }

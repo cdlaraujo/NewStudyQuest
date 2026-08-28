@@ -1,26 +1,17 @@
-import { randomUUID } from 'crypto';
 import { Quest } from './Quest.js';
 import { normalize } from '../shared/normalize.js';
-
-const GAP_PATTERN = /\{([^}]*)\}/g;
+import { createId } from '../shared/createId.js';
 
 /**
- * Frase com uma ou mais lacunas escritas entre chaves, ex.:
- * "O {núcleo} armazena DNA.". Na construção, as palavras esperadas são
- * extraídas em ordem; a frase original é mantida para exibição.
+ * Questão com uma ou mais lacunas. O texto exibido e as respostas ficam separados,
+ * evitando que `{}` de LaTeX seja confundido com marcação do EduQuest.
  */
 export class FillInTheBlankQuest extends Quest {
   #expectedWords;
 
-  constructor(sentence, id = randomUUID()) {
-    super(id, sentence);
-    this.#expectedWords = FillInTheBlankQuest.extractGaps(sentence);
-  }
-
-  /** Extrai as palavras dentro de `{}` de uma frase, preservando a ordem. */
-  static extractGaps(sentence) {
-    const matches = sentence.match(GAP_PATTERN) ?? [];
-    return matches.map((match) => match.slice(1, -1).trim());
+  constructor(prompt, answers, id = createId()) {
+    super(id, prompt);
+    this.#expectedWords = [...answers];
   }
 
   get gapCount() {
@@ -48,17 +39,24 @@ export class FillInTheBlankQuest extends Quest {
     return {
       id: this.id,
       type: 'fill-in-the-blank',
-      prompt: this.question.replace(GAP_PATTERN, '_____'),
+      prompt: this.question,
       gaps: this.gapCount,
+      completed: this.isCompleted(),
     };
   }
 
   toJSON() {
-    return { type: 'fill-in-the-blank', id: this.id, question: this.question, completed: this.isCompleted() };
+    return {
+      type: 'fill-in-the-blank',
+      id: this.id,
+      question: this.question,
+      answers: [...this.#expectedWords],
+      completed: this.isCompleted(),
+    };
   }
 
   static fromJSON(data) {
-    const q = new FillInTheBlankQuest(data.question, data.id);
+    const q = new FillInTheBlankQuest(data.question, data.answers ?? [], data.id);
     if (data.completed) q._restoreCompleted();
     return q;
   }

@@ -1,13 +1,10 @@
-/**
- * Retorna a próxima quest para revisão, escolhida pela strategy de peso da fila
- * do jogador. Útil quando o jogador quer revisar em vez de avançar.
- */
+/** Retorna a próxima quest da fila de revisão da sessão. */
 export class GetNextReview {
-  constructor(getReviewQueue) {
-    this.getReviewQueue = getReviewQueue;
+  constructor(reviewQueue) {
+    this.reviewQueue = reviewQueue;
   }
 
-  execute(playerId) {
-    return this.getReviewQueue(playerId).getNext();
+  execute() {
+    return this.reviewQueue.getNext();
   }
 }

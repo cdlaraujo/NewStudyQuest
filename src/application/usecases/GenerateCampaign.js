@@ -1,17 +1,12 @@
-/**
- * Analisa o texto formatado pelo chatbot em uma campanha e a persiste. O
- * backend nunca chama um LLM — ele apenas analisa o texto que o estudante
- * já produziu com um chatbot externo.
- */
+/** Analisa o JSON produzido pelo chatbot em uma campanha e a persiste localmente. */
 export class GenerateCampaign {
   constructor(parser, campaigns) {
     this.parser = parser;
     this.campaigns = campaigns;
   }
 
-  execute(rawText, ownerId) {
+  execute(rawText) {
     const campaign = this.parser.parse(rawText);
-    campaign.ownerId = ownerId;
     this.campaigns.save(campaign);
     return campaign;
   }

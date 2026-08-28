@@ -11,10 +11,6 @@
   <body>
     <header class="topbar">
       <div class="brand">⚔️ EduQuest</div>
-      <div class="player-id">
-        <label for="player-id-input" class="muted">Jogador</label>
-        <input id="player-id-input" placeholder="seu-id" />
-      </div>
       <div id="hud" class="hud" hidden>
         <span class="hud-item" title="Level">🏅 Lv <strong id="hud-level">1</strong></span>
         <span class="hud-item" title="Experience">
@@ -37,15 +33,15 @@
         </div>
 
         <p class="muted">
-          Cole o material de estudo formatado pelo chatbot abaixo (veja
+          Cole o JSON gerado pelo chatbot abaixo (veja
           <code>PROMPT.md</code>), ou carregue o exemplo, e gere sua campanha.
         </p>
-        <textarea id="source" spellcheck="false" rows="14"></textarea>
+        <p id="create-error" class="error" role="alert" aria-live="polite" hidden></p>
+        <textarea id="source" spellcheck="false" rows="14" aria-describedby="create-error"></textarea>
         <div class="row">
           <button id="load-sample" class="btn ghost">Carregar exemplo</button>
           <button id="generate-btn" class="btn primary">Gerar campanha →</button>
         </div>
-        <p id="create-error" class="error" hidden></p>
       </section>
 
       <!-- Jogar -->
@@ -74,6 +70,6 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

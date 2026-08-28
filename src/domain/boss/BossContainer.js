@@ -32,6 +32,10 @@ export class BossContainer {
     return this.#quests[this.#current] ?? null;
   }
 
+  getCurrentIndex() {
+    return this.#current;
+  }
+
   containsQuest(questId) {
     return this.#quests.some((quest) => quest.id === questId);
   }

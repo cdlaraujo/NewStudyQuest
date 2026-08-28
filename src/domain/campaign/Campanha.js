@@ -2,16 +2,13 @@ import { Trilha, TrailState } from '../trail/Trilha.js';
 
 /**
  * A campanha possui suas trilhas (ordenadas por ordem) e a regra de desbloqueio
- * sequencial. Na construção, a primeira trilha (ORDEM: 1) é desbloqueada
+ * sequencial. Na construção, a primeira trilha (order: 1) é desbloqueada
  * automaticamente; concluir a trilha atual desbloqueia a próxima. Essa lógica
  * de progressão vive aqui e em nenhum outro lugar.
  */
 export class Campanha {
   /** Atribuído pelo repositório quando a campanha é persistida pela primeira vez. */
   id;
-
-  /** Id do jogador que gerou esta campanha; atribuído pelo caso de uso GenerateCampaign. */
-  ownerId;
 
   #trails;
 
@@ -59,7 +56,6 @@ export class Campanha {
   toJSON() {
     return {
       id: this.id,
-      ownerId: this.ownerId,
       name: this.name,
       trails: this.#trails.map((t) => t.toJSON()),
     };
@@ -69,7 +65,6 @@ export class Campanha {
     const trails = data.trails.map((t) => Trilha.fromJSON(t, questFactory));
     const campaign = new Campanha(data.name, trails, true);
     campaign.id = data.id;
-    campaign.ownerId = data.ownerId;
     return campaign;
   }
 }

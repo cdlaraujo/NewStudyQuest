@@ -1,5 +1,5 @@
 /**
- * Mapeia objetos de domínio para DTOs simples e seguros para JSON em respostas HTTP.
+ * Mapeia objetos de domínio para DTOs simples para a interface do navegador.
  * As quests expõem sua própria projeção de exibição via toView(), portanto nenhum
  * `instanceof`/type switching é necessário aqui, e as respostas corretas nunca são
  * serializadas.
@@ -16,6 +16,7 @@ export function trailToDto(trail) {
     state: trail.getState(),
     quests: trail.getQuests().map(questToDto),
     boss: trail.getBoss().getQuests().map(questToDto),
+    bossCurrent: trail.getBoss().getCurrentIndex(),
   };
 }
 
